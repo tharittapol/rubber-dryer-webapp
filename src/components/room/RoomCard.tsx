@@ -3,15 +3,15 @@ import { Card } from "@/components/ui/Card";
 import type { RoomState, RoomSummary } from "@/types/room";
 
 const stateStyle: Record<RoomState, { label: string; cls: string }> = {
-  RUNNING:   { label: "กำลังทำงาน", cls: "border-green bg-[color:rgba(20,174,92,0.20)] text-[color:#009951]" },
-  WARM_HOLD: { label: "รักษาอุณหภูมิ", cls: "border-orange bg-[color:rgba(255,105,0,0.20)] text-orange" },
-  READY:     { label: "พร้อมทำงาน", cls: "border-blue bg-[color:rgba(43,127,255,0.20)] text-blue" },
-  WAITING:   { label: "รอดำเนินการ", cls: "border-orange bg-[color:rgba(255,105,0,0.12)] text-orange" },
-  STOPPED:   { label: "หยุดทำงาน", cls: "border-border bg-surface text-muted" },
-  FAULT:     { label: "ขัดข้อง", cls: "border-red bg-[color:rgba(236,34,31,0.12)] text-red" },
+  RUNNING: { label: "กำลังทำงาน", cls: "border-green bg-greenBg text-greenInk" },
+  WARM_HOLD: { label: "รักษาอุณหภูมิ", cls: "border-orange bg-orangeBg text-orangeInk" },
+  READY: { label: "พร้อมทำงาน", cls: "border-blue bg-[color:rgba(43,127,255,0.15)] text-blue" },
+  WAITING: { label: "รอดำเนินการ", cls: "border-orange bg-[color:rgba(255,105,0,0.12)] text-orangeInk" },
+  STOPPED: { label: "หยุดทำงาน", cls: "border-border bg-surface text-muted" },
+  FAULT: { label: "ขัดข้อง", cls: "border-red bg-redBg text-red" },
 };
 
-function Metric({ title, value, unit }: { title: string; value: string; unit: string }) {
+function Metric({ value, unit }: { value: string; unit: string }) {
   return (
     <div className="flex items-center gap-3">
       <div className="h-[46px] w-[46px] rounded-sm bg-surface grid place-items-center text-muted">◎</div>
@@ -40,9 +40,9 @@ export function RoomCard(room: RoomSummary) {
       </div>
 
       <div className="mt-5 flex flex-wrap gap-6">
-        <Metric title="Temp" value={room.tempC.toFixed(1)} unit="°C" />
-        <Metric title="Hum" value={room.humRH.toFixed(1)} unit="%RH" />
-        <Metric title="Kiln" value={room.kilnOn ? "เปิด" : "ปิด"} unit="เตา" />
+        <Metric value={room.tempC.toFixed(1)} unit="°C" />
+        <Metric value={room.humRH.toFixed(1)} unit="%RH" />
+        <Metric value={room.kilnOn ? "เปิด" : "ปิด"} unit="เตา" />
       </div>
 
       <div className="mt-5 rounded-md bg-surface p-4">
@@ -59,7 +59,7 @@ export function RoomCard(room: RoomSummary) {
             </div>
 
             <div className="text-muted">คาดว่าเสร็จ:</div>
-            <div className="font-semibold text-right text-[color:#009951]">{room.etaText ?? "-"}</div>
+            <div className="font-semibold text-right text-greenInk">{room.etaText ?? "-"}</div>
           </div>
         )}
       </div>

@@ -1,11 +1,15 @@
 /**
- * Skeleton auth for UI prototyping.
- * Production: use httpOnly cookies + server-side session/refresh token.
+ * Prototype auth helpers for UI development.
+ *
+ * Production recommendation:
+ * - Use httpOnly cookies for refresh token
+ * - Validate session server-side
+ * - Apply RBAC (ADMIN/USER/VIEWER/OPERATOR)
  */
 export const AUTH_COOKIE = "rd_token";
 
 export function setAuthCookie(token: string) {
-  // Client-side cookie for prototype; switch to httpOnly in production.
+  // Prototype-only: client-side cookie. Replace with httpOnly cookie in production.
   document.cookie = `${AUTH_COOKIE}=${token}; path=/; max-age=${60 * 60 * 12}`;
 }
 

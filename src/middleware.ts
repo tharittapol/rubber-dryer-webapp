@@ -7,7 +7,7 @@ const PROTECTED_PREFIXES = ["/dashboard", "/control", "/settings"];
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // allow next internals
+  // Allow Next.js internals
   if (pathname.startsWith("/_next") || pathname.startsWith("/api") || pathname.startsWith("/favicon")) {
     return NextResponse.next();
   }

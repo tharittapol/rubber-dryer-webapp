@@ -1,25 +1,49 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
 :root{
-  --bg: #ffffff;
+  --bg: #FFFFFF;
   --text: #1E1E1E;
   --muted: #757575;
+
   --border: #D9D9D9;
+  --border-2: #E3E3E3;
+
   --surface: #F5F5F5;
+  --surface-2: #F3F3F3;
+
+  --ink: #2C2C2C;
+  --ink-2: #303030;
+
+  --green: #14AE5C;
+  --green-ink: #009951;
+  --green-bg: #EBFFEE;
+
+  --blue: #2B7FFF;
+
+  --orange: #FF6900;
+  --orange-ink: #BF6A02;
+  --orange-bg: #FFF0E6;
+
+  --red: #EC221F;
+  --red-bg: #FEE9E7;
+
+  --grey-1: #B3B3B3;
+  --grey-2: #767676;
 
   --r-sm: 8px;
   --r-md: 16px;
   --r-lg: 24px;
+  --r-xl: 32px;
+  --r-pill: 9999px;
 
-  --green: #14AE5C;
-  --blue: #2B7FFF;
-  --orange: #FF6900;
-  --red: #EC221F;
+  --shadow-soft: 0px 16px 32px -4px rgba(12, 12, 13, 0.10), 0px 4px 4px -4px rgba(12, 12, 13, 0.05);
+
+  --ring-blue: 0px 0px 0px 6px rgba(43, 127, 255, 0.20);
+  --ring-green: 0px 0px 0px 6px #CFF7D3;
+  --ring-red: 0px 0px 0px 6px #FDD3D0;
 }
 
-html, body {
-  height: 100%;
-}
+html, body { height: 100%; }
 
 body{
   margin: 0;
@@ -28,7 +52,6 @@ body{
   color: var(--text);
 }
 
-/* Tailwind base */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
