@@ -43,7 +43,65 @@ const MOCK: RoomSummary[] = [
   },
 ];
 
-export default function DashboardPage() {
+type PageProps = {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function DashboardPage({ searchParams }: PageProps) {
+  const sp = (await searchParams) ?? {};
+  const qRaw = sp.q;
+  const q = (Array.isArray(qRaw) ? qRaw[0] : qRaw ?? "").toLowerCase().trim();
+
+  // rooms: mock
+  const rooms: RoomSummary[] = [
+    {
+      roomId: "room-1",
+      roomName: "Room A",
+      roomNo: "01",
+      factoryName: "Factory 1",
+      state: "RUNNING",
+      tempC: 62.1,
+      humRH: 45.3,
+      kilnOn: true,
+      profileName: "STD-10H",
+      hourNow: 3,
+      hourTotal: 10,
+      etaText: "18:40",
+      lastUpdateText: "2 นาทีที่แล้ว",
+    },
+    {
+      roomId: "room-2",
+      roomName: "Room B",
+      roomNo: "02",
+      factoryName: "Factory 1",
+      state: "READY",
+      tempC: 29.2,
+      humRH: 58.1,
+      kilnOn: false,
+      profileName: "-",
+      lastUpdateText: "5 นาทีที่แล้ว",
+    },
+    {
+      roomId: "room-3",
+      roomName: "Room C",
+      roomNo: "03",
+      factoryName: "Factory 2",
+      state: "FAULT",
+      tempC: 0,
+      humRH: 0,
+      kilnOn: false,
+      lastUpdateText: "1 นาทีที่แล้ว",
+      alarmText: "Sensor TEMP ขาดหาย / Communication error",
+    },
+  ];
+
+  const filteredRooms = !q
+    ? rooms
+    : rooms.filter((r) => {
+        const hay = `${r.roomName ?? ""} ${r.roomNo ?? ""} ${r.factoryName ?? ""}`.toLowerCase();
+        return hay.includes(q);
+      });
+
   return (
     <div className="w-full">
       {/* Content width matches the Figma main frame (1112px) */}
@@ -69,13 +127,21 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Room cards grid (2 columns on desktop, 1 on mobile) */}
+        {/* Room cards grid (2 columns on desktop, 1 on mobile)
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {MOCK.map((r) => (
             <div key={r.roomId} className="w-full">
               <RoomCard {...r} />
             </div>
           ))}
+        </div> */}
+        <div>
+          {/* ...header... */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            {filteredRooms.map((r) => (
+              <RoomCard key={r.roomId} {...r} />
+            ))}
+          </div>
         </div>
       </div>
     </div>

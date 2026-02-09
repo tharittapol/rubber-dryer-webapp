@@ -3,6 +3,46 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import type { RoomState, RoomSummary } from "@/types/room";
 
+function fmt1(v: unknown): string {
+  const n = typeof v === "number" ? v : Number(v);
+  if (!Number.isFinite(n)) return "--";
+  return n.toFixed(1);
+}
+
+type RoomState =
+  | "RUNNING"
+  | "WARM_HOLD"
+  | "READY"
+  | "WAITING"
+  | "STOPPED"
+  | "FAULT";
+
+const STATE_UI: Record<RoomState, { label: string; cls: string }> = {
+  RUNNING: { label: "RUNNING", cls: "bg-greenBg text-greenInk border-greenInk/20" },
+  WARM_HOLD: { label: "WARM HOLD", cls: "bg-orangeBg text-orangeInk border-orangeInk/20" },
+  READY: { label: "READY", cls: "bg-surface text-text border-border" },
+  WAITING: { label: "WAITING", cls: "bg-yellowBg text-ink border-border" },
+  STOPPED: { label: "STOPPED", cls: "bg-surface text-muted border-border" },
+  FAULT: { label: "FAULT", cls: "bg-redBg text-red border-red/20" },
+};
+
+function normalizeState(input: unknown): string {
+  return String(input ?? "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "_"); // "warm hold" -> "WARM_HOLD"
+}
+
+function getRoomStateUI(input: unknown) {
+  const key = normalizeState(input) as RoomState;
+  return (
+    STATE_UI[key] ?? {
+      label: "UNKNOWN",
+      cls: "bg-surface text-muted border-border",
+    }
+  );
+}
+
 const stateStyle: Record<RoomState, { label: string; cls: string }> = {
   RUNNING: { label: "กำลังทำงาน", cls: "border-green bg-greenBg text-greenInk" },
   WARM_HOLD: { label: "รักษาอุณหภูมิ", cls: "border-orange bg-orangeBg text-orangeInk" },
@@ -78,7 +118,8 @@ function Metric({ kind, value, unit }: { kind: MetricKind; value: string; unit: 
 }
 
 export function RoomCard(room: RoomSummary) {
-  const st = stateStyle[room.state];
+  // const st = stateStyle[room.state];
+  const st = getRoomStateUI(room.state);
 
   return (
     <Link href={`/dashboard/rooms/${encodeURIComponent(room.roomId)}`} className="block">
@@ -90,13 +131,12 @@ export function RoomCard(room: RoomSummary) {
               ห้อง {room.roomNo} | โรงงาน {room.factoryName}
             </div>
           </div>
-
           <Badge className={st.cls}>{st.label}</Badge>
         </div>
 
         <div className="mt-4 flex items-center justify-between gap-4">
-          <Metric kind="temp" value={room.tempC.toFixed(1)} unit="°C" />
-          <Metric kind="hum" value={room.humRH.toFixed(1)} unit="%RH" />
+          <Metric kind="temp" value={fmt1(room.tempC)} unit="°C" />
+          <Metric kind="hum" value={fmt1(room.humRH)} unit="%RH" />
           <Metric kind="kiln" value={room.kilnOn ? "เปิด" : "ปิด"} unit="เตา" />
         </div>
 

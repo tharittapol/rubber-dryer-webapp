@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { setAuthCookie } from "@/lib/auth";
+import { Logo } from "@/components/brand/Logo";
 
 const schema = z.object({
   email: z.string(),
@@ -38,7 +39,7 @@ export default function LoginPage() {
       {/* AuthHeader (reusable block) */}
       <div className="rd-stack-24 items-center">
         <div className="relative w-[100px] h-[100px]">
-          <div className="absolute left-[12.5%] right-[12.5%] top-[8.34%] bottom-[8%] border-[4px] border-text rounded-sm" />
+          <Logo size={100} />
         </div>
 
         <div className="rd-stack-8 items-center w-full max-w-[240px]">
