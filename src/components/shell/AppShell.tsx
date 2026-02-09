@@ -8,13 +8,28 @@ import { clearAuthCookie } from "@/lib/auth";
 import * as React from "react";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/control", label: "Control" },
-  { href: "/settings/profiles", label: "Profiles" },
-  { href: "/settings/factories", label: "Factories" },
-  { href: "/settings/rooms", label: "Rooms" },
-  { href: "/settings/users", label: "Users" },
+  { href: "/dashboard", label: "หน้าหลัก" },
+  { href: "/control", label: "ควบคุม" },
+  { href: "/settings/profiles", label: "โปรไฟล์อุณหภูมิ" },
+  { href: "/settings/factories", label: "ตั้งค่าโรงงาน" },
+  { href: "/settings/rooms", label: "ตั้งค่าห้องอบ" },
+  { href: "/settings/users", label: "ตั้งค่าผู้ใช้งาน" },
 ];
+
+function SearchBar() {
+  return (
+    <div className="hidden sm:flex items-center gap-2 h-10 w-[335px] rounded-pill border border-border bg-bg px-4">
+      <input
+        className="flex-1 bg-transparent outline-none text-[16px] leading-[100%] placeholder:text-grey1"
+        placeholder="ค้นหา..."
+        aria-label="Search"
+      />
+      <div aria-hidden className="h-4 w-4 rounded-full border-[1.6px] border-text relative">
+        <div className="absolute -right-1 -bottom-1 h-2 w-[1.6px] bg-text rotate-45" />
+      </div>
+    </div>
+  );
+}
 
 function NavLink({ href, label }: { href: string; label: string }) {
   const pathname = usePathname();
@@ -38,7 +53,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const Sidebar = (
     <div className="h-full flex flex-col">
       <div className="h-[84px] px-6 flex items-center border-b border-border">
-        <div className="font-semibold text-[18px]">Rubber Dryer</div>
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-md border border-border grid place-items-center">
+            <div className="h-5 w-5 border-2 border-text" aria-hidden />
+          </div>
+          <div>
+            <div className="text-[18px] font-semibold leading-[120%]">Rubber Dryer System</div>
+            <div className="text-[14px] text-muted leading-[140%]">ระบบควบคุมห้องอบยางพารา</div>
+          </div>
+        </div>
       </div>
       <nav className="p-6 flex-1 space-y-2">
         {navItems.map((it) => (
@@ -75,10 +98,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               >
                 ☰
               </button>
-              <div className="text-[18px] font-semibold">Control Panel</div>
             </div>
 
-            <div className="text-[14px] text-muted">Prototype UI • Ready for API hookup</div>
+            <SearchBar />
           </header>
 
           <main className="px-6 lg:px-6 py-6">{children}</main>

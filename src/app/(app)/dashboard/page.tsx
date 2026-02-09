@@ -45,18 +45,38 @@ const MOCK: RoomSummary[] = [
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-5">
-      <div className="flex items-end justify-between gap-3">
-        <div>
-          <div className="rd-h24">Dashboard</div>
-          <div className="rd-body16 rd-muted mt-2">Monitor ทุกห้อง (Responsive: มือถือ 1 คอลัมน์ / เดสก์ท็อป 2-3 คอลัมน์)</div>
-        </div>
-      </div>
+    <div className="w-full">
+      {/* Content width matches the Figma main frame (1112px) */}
+      <div className="mx-auto max-w-[1112px]">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+          <div className="min-w-0">
+            <div className="text-[24px] font-semibold leading-[120%]">แดชบอร์ด</div>
+            <div className="mt-2 text-[20px] leading-[120%] text-muted">ติดตามสถานะห้องอบทั้งหมด</div>
+          </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {MOCK.map((r) => (
-          <RoomCard key={r.roomId} {...r} />
-        ))}
+          {/* Factory select (as in Figma export) */}
+          <div className="w-full lg:w-[410.5px] rounded-md border border-border bg-bg p-6">
+            <div className="text-[20px] leading-[120%] text-muted">โรงงาน</div>
+            <select
+              className="mt-3 h-10 w-full rounded-md border border-border bg-bg px-4 text-[16px] leading-[100%]"
+              defaultValue="all"
+              aria-label="Factory"
+            >
+              <option value="all">ทุกโรงงาน</option>
+              <option value="A">โรงงาน A</option>
+              <option value="B">โรงงาน B</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Room cards grid (2 columns on desktop, 1 on mobile) */}
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {MOCK.map((r) => (
+            <div key={r.roomId} className="w-full">
+              <RoomCard {...r} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
