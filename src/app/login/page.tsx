@@ -36,25 +36,25 @@ export default function LoginPage() {
     <div className="min-h-screen grid place-items-center px-4">
       <div className="w-full max-w-[520px] rounded-lg border border-border bg-bg p-8 shadow-soft">
         <div className="text-center">
-          <div className="text-[28px] font-semibold leading-[120%]">Rubber Dryer</div>
-          <div className="mt-2 text-[16px] text-muted">เข้าสู่ระบบเพื่อใช้งาน</div>
+          <div className="rd-h28">Rubber Dryer</div>
+          <div className="mt-2 rd-body16 rd-muted">เข้าสู่ระบบเพื่อใช้งาน</div>
         </div>
 
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit(onSubmit)}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div>
-            <label className="text-[14px] text-muted">อีเมล</label>
+            <label className="rd-body14 rd-muted">อีเมล</label>
             <div className="mt-2">
               <Input placeholder="name@company.com" {...register("email")} />
             </div>
-            {errors.email && <div className="mt-2 text-[14px] text-red">{errors.email.message}</div>}
+            {errors.email && <div className="mt-2 rd-body14 text-red">{errors.email.message}</div>}
           </div>
 
           <div>
-            <label className="text-[14px] text-muted">รหัสผ่าน</label>
+            <label className="rd-body14 rd-muted">รหัสผ่าน</label>
             <div className="mt-2">
               <Input type="password" placeholder="••••••••" {...register("password")} />
             </div>
-            {errors.password && <div className="mt-2 text-[14px] text-red">{errors.password.message}</div>}
+            {errors.password && <div className="mt-2 rd-body14 text-red">{errors.password.message}</div>}
           </div>
 
           {serverError && <div className="rounded-sm border border-red bg-[color:rgba(236,34,31,0.08)] p-3 text-red">{serverError}</div>}

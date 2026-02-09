@@ -31,6 +31,8 @@ export default {
         red: "var(--red)",
         redBg: "var(--red-bg)",
 
+        yellowBg: "var(--yellow-bg)",
+
         grey1: "var(--grey-1)",
         grey2: "var(--grey-2)",
       },
@@ -46,6 +48,8 @@ export default {
         ringBlue: "var(--ring-blue)",
         ringGreen: "var(--ring-green)",
         ringRed: "var(--ring-red)",
+        ringOrange: "var(--ring-orange)",
+        ringYellow: "var(--ring-yellow)",
       },
     },
   },

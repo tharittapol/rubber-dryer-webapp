@@ -48,12 +48,12 @@ export default function DashboardPage() {
     <div className="space-y-5">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <div className="text-[26px] font-semibold leading-[120%]">Dashboard</div>
-          <div className="text-muted mt-1">Monitor ทุกห้อง (Responsive: มือถือ 1 คอลัมน์ / เดสก์ท็อป 2-3 คอลัมน์)</div>
+          <div className="rd-h24">Dashboard</div>
+          <div className="rd-body16 rd-muted mt-2">Monitor ทุกห้อง (Responsive: มือถือ 1 คอลัมน์ / เดสก์ท็อป 2-3 คอลัมน์)</div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {MOCK.map((r) => (
           <RoomCard key={r.roomId} {...r} />
         ))}

@@ -24,8 +24,8 @@ export function Button({
     danger: "border-red bg-red text-white hover:opacity-90",
   };
   const sizes: Record<Size, string> = {
-    md: "h-[46px] px-4 text-[16px]",
-    sm: "h-[40px] px-3 text-[14px]",
+    md: "h-[46px] px-4 text-[16px] leading-[140%]",
+    sm: "h-[40px] px-3 text-[14px] leading-[140%]",
   };
   return <button className={cn(base, variants[variant], sizes[size], className)} {...props} />;
 }

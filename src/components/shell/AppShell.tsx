@@ -37,15 +37,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const Sidebar = (
     <div className="h-full flex flex-col">
-      <div className="h-[84px] px-4 flex items-center border-b border-border">
+      <div className="h-[84px] px-6 flex items-center border-b border-border">
         <div className="font-semibold text-[18px]">Rubber Dryer</div>
       </div>
-      <nav className="p-4 flex-1 space-y-2">
+      <nav className="p-6 flex-1 space-y-2">
         {navItems.map((it) => (
           <NavLink key={it.href} href={it.href} label={it.label} />
         ))}
       </nav>
-      <div className="p-4 border-t border-border">
+      <div className="p-6 border-t border-border">
         <Button
           variant="ghost"
           className="w-full"
@@ -66,7 +66,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <aside className="hidden lg:block w-[280px] border-r border-border bg-bg">{Sidebar}</aside>
 
         <div className="flex-1 min-w-0">
-          <header className="h-[84px] border-b border-border bg-bg flex items-center justify-between px-4 lg:px-6">
+          <header className="h-[84px] border-b border-border bg-bg flex items-center justify-between px-6 lg:px-6">
             <div className="flex items-center gap-3">
               <button
                 className="lg:hidden rounded-sm border border-border h-10 w-10"
@@ -81,7 +81,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="text-[14px] text-muted">Prototype UI • Ready for API hookup</div>
           </header>
 
-          <main className="px-4 lg:px-6 py-6">{children}</main>
+          <main className="px-6 lg:px-6 py-6">{children}</main>
         </div>
       </div>
 
@@ -89,19 +89,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-[color:rgba(0,0,0,0.25)]" onClick={() => setMobileOpen(false)} />
-          <div className="absolute left-0 top-0 h-full w-[300px] bg-bg border-r border-border shadow-soft">
-            <div className="flex items-center justify-between px-4 h-[84px] border-b border-border">
+          <div className="absolute left-0 top-0 h-full w-[280px] bg-bg border-r border-border shadow-soft">
+            <div className="flex items-center justify-between px-6 h-[84px] border-b border-border">
               <div className="font-semibold">Rubber Dryer</div>
               <button className="h-10 w-10 rounded-sm border border-border" onClick={() => setMobileOpen(false)}>
                 ✕
               </button>
             </div>
-            <div className="p-4 space-y-2" onClick={() => setMobileOpen(false)}>
+            <div className="p-6 space-y-2" onClick={() => setMobileOpen(false)}>
               {navItems.map((it) => (
                 <NavLink key={it.href} href={it.href} label={it.label} />
               ))}
             </div>
-            <div className="p-4 border-t border-border">
+            <div className="p-6 border-t border-border">
               <Button
                 variant="ghost"
                 className="w-full"

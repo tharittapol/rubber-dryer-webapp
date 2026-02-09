@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/Button";
 
 export default function ControlPage() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
-        <div className="text-[26px] font-semibold leading-[120%]">Control</div>
-        <div className="text-muted mt-1">โครงหน้าควบคุม (จะต่อ API + realtime + confirmation popup ตาม design)</div>
+        <div className="rd-h24">Control</div>
+        <div className="rd-body16 rd-muted mt-2">โครงหน้าควบคุม (จะต่อ API + realtime + confirmation popup ตาม design)</div>
       </div>
 
       <Card className="shadow-none">
