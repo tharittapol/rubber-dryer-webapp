@@ -76,14 +76,19 @@ body{
   .rd-heading-24 { font-size: 24px; line-height: 120%; font-weight: 600; letter-spacing: -0.02em; }
   .rd-subheading-20 { font-size: 20px; line-height: 120%; font-weight: 400; }
 
+  .rd-page-32 { font-size: 32px; line-height: 120%; font-weight: 700; }
+
   .rd-label { font-size: 16px; line-height: 140%; font-weight: 400; color: var(--text); }
 
   .rd-h28 { font-size: 28px; line-height: 120%; font-weight: 600; }
   .rd-h24 { font-size: 24px; line-height: 120%; font-weight: 600; }
   .rd-h20 { font-size: 20px; line-height: 120%; font-weight: 600; }
 
-  .rd-body16 { font-size: 16px; line-height: 140%; }
-  .rd-body14 { font-size: 14px; line-height: 140%; }
+  .rd-body20 { font-size: 20px; line-height: 140%; font-weight: 400;}
+  .rd-body16 { font-size: 16px; line-height: 140%; font-weight: 400;}
+  .rd-body14 { font-size: 14px; line-height: 140%; font-weight: 400;}
+
+  .rd-sub16 { font-size: 16px; line-height: 100%; font-weight: 400;}
 
   .rd-muted { color: var(--muted); }
 

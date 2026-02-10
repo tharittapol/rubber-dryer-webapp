@@ -18,39 +18,22 @@ type RoomState =
   | "FAULT";
 
 const STATE_UI: Record<RoomState, { label: string; cls: string }> = {
-  RUNNING: { label: "RUNNING", cls: "bg-greenBg text-greenInk border-greenInk/20" },
-  WARM_HOLD: { label: "WARM HOLD", cls: "bg-orangeBg text-orangeInk border-orangeInk/20" },
-  READY: { label: "READY", cls: "bg-surface text-text border-border" },
-  WAITING: { label: "WAITING", cls: "bg-yellowBg text-ink border-border" },
-  STOPPED: { label: "STOPPED", cls: "bg-surface text-muted border-border" },
-  FAULT: { label: "FAULT", cls: "bg-redBg text-red border-red/20" },
+  RUNNING:   { label: "กำลังทำงาน",   cls: "bg-greenBg text-greenInk border-greenInk" },
+  WARM_HOLD: { label: "รักษาอุณหภูมิ", cls: "bg-orangeBg text-orangeInk border-orangeInk" },
+  READY:     { label: "พร้อมทำงาน",   cls: "bg-[color:rgba(43,127,255,0.2)] text-blue border-blue" },
+  WAITING:   { label: "รอดำเนินการ",  cls: "bg-[color:rgba(232,185,49,0.2)] text-orangeInk border-[color:#975102]" },
+  STOPPED:   { label: "หยุดทำงาน",    cls: "bg-[#F5F5F5] text-ink border-[#767676]" },
+  FAULT:     { label: "ขัดข้อง",      cls: "bg-redBg text-red border-red" },
 };
 
 function normalizeState(input: unknown): string {
-  return String(input ?? "")
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, "_"); // "warm hold" -> "WARM_HOLD"
+  return String(input ?? "").trim().toUpperCase().replace(/\s+/g, "_");
 }
 
 function getRoomStateUI(input: unknown) {
   const key = normalizeState(input) as RoomState;
-  return (
-    STATE_UI[key] ?? {
-      label: "UNKNOWN",
-      cls: "bg-surface text-muted border-border",
-    }
-  );
+  return STATE_UI[key] ?? { label: "ไม่ทราบสถานะ", cls: "bg-[#F5F5F5] text-muted border-border" };
 }
-
-const stateStyle: Record<RoomState, { label: string; cls: string }> = {
-  RUNNING: { label: "กำลังทำงาน", cls: "border-green bg-greenBg text-greenInk" },
-  WARM_HOLD: { label: "รักษาอุณหภูมิ", cls: "border-orange bg-orangeBg text-orangeInk" },
-  READY: { label: "พร้อมทำงาน", cls: "border-blue bg-[color:rgba(43,127,255,0.15)] text-blue" },
-  WAITING: { label: "รอดำเนินการ", cls: "border-orange bg-[color:rgba(255,105,0,0.12)] text-orangeInk" },
-  STOPPED: { label: "หยุดทำงาน", cls: "border-border bg-surface text-muted" },
-  FAULT: { label: "ขัดข้อง", cls: "border-red bg-redBg text-red" },
-};
 
 function ThermometerIcon() {
   return (
@@ -105,36 +88,40 @@ function Metric({ kind, value, unit }: { kind: MetricKind; value: string; unit: 
         : "bg-[color:rgba(20,174,92,0.2)] text-greenInk";
 
   return (
-    <div className="flex items-center gap-2">
-      <div className={"h-[46px] w-[46px] rounded-sm grid place-items-center " + iconWrapCls}>
+    <div className="flex items-center gap-2 min-w-0">
+      <div className={"h-[46px] w-[46px] shrink-0 rounded-sm grid place-items-center " + iconWrapCls}>
         {kind === "temp" ? <ThermometerIcon /> : kind === "hum" ? <DropIcon /> : <FlameIcon />}
       </div>
-      <div>
-        <div className="text-[20px] font-semibold leading-[120%]">{value}</div>
-        <div className="text-[16px] text-muted leading-[140%]">{unit}</div>
+      <div className="min-w-0">
+        <div className="text-[20px] font-semibold leading-[120%] truncate">{value}</div>
+        <div className="text-[16px] text-muted leading-[140%] truncate">{unit}</div>
       </div>
     </div>
   );
 }
 
 export function RoomCard(room: RoomSummary) {
-  // const st = stateStyle[room.state];
   const st = getRoomStateUI(room.state);
 
   return (
-    <Link href={`/dashboard/rooms/${encodeURIComponent(room.roomId)}`} className="block">
-      <Card className="shadow-none h-[373px] w-full md:w-[544px]">
-        <div className="flex items-start justify-between gap-3">
+    <Link href={`/dashboard/rooms/${encodeURIComponent(room.roomId)}`} className="block h-full">
+      <Card className="shadow-none w-full max-w-[544px]">
+        <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <div className="text-[24px] font-semibold leading-[120%] truncate">{room.roomName}</div>
-            <div className="text-[20px] text-muted leading-[120%] truncate">
+            <div className="text-[24px] font-semibold leading-[120%] truncate">
+              {room.roomName}
+            </div>
+            <div className="mt-1 text-[16px] text-muted leading-[120%] truncate">
               ห้อง {room.roomNo} | โรงงาน {room.factoryName}
             </div>
           </div>
-          <Badge className={st.cls}>{st.label}</Badge>
+
+          <div className="shrink-0">
+            <Badge className={st.cls}>{st.label}</Badge>
+          </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-4">
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
           <Metric kind="temp" value={fmt1(room.tempC)} unit="°C" />
           <Metric kind="hum" value={fmt1(room.humRH)} unit="%RH" />
           <Metric kind="kiln" value={room.kilnOn ? "เปิด" : "ปิด"} unit="เตา" />
@@ -150,7 +137,7 @@ export function RoomCard(room: RoomSummary) {
 
               <div className="text-muted">ชั่วโมงที่:</div>
               <div className="font-semibold text-right">
-                {room.hourNow && room.hourTotal ? `${room.hourNow} / ${room.hourTotal}` : "-"}
+                {room.hourNow != null && room.hourTotal != null ? `${room.hourNow} / ${room.hourTotal}` : "-"}
               </div>
 
               <div className="text-muted">คาดว่าเสร็จ:</div>

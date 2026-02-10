@@ -104,44 +104,49 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   return (
     <div className="w-full">
-      {/* Content width matches the Figma main frame (1112px) */}
       <div className="mx-auto max-w-[1112px]">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
           <div className="min-w-0">
-            <div className="text-[24px] font-semibold leading-[120%]">แดชบอร์ด</div>
-            <div className="mt-2 text-[20px] leading-[120%] text-muted">ติดตามสถานะห้องอบทั้งหมด</div>
+            <div className="rd-page-32">แดชบอร์ด</div>
+            <div className="mt-2 rd-body20 text-muted">ติดตามสถานะห้องอบทั้งหมด</div>
           </div>
 
-          {/* Factory select (as in Figma export) */}
-          <div className="w-full lg:w-[410.5px] rounded-md border border-border bg-bg p-6">
-            <div className="text-[20px] leading-[120%] text-muted">โรงงาน</div>
-            <select
-              className="mt-3 h-10 w-full rounded-md border border-border bg-bg px-4 text-[16px] leading-[100%]"
-              defaultValue="all"
-              aria-label="Factory"
-            >
-              <option value="all">ทุกโรงงาน</option>
-              <option value="A">โรงงาน A</option>
-              <option value="B">โรงงาน B</option>
-            </select>
+          {/* Factory select */}
+          <div className="w-full lg:w-[410.5px]">
+            <div className="rd-body16">โรงงาน</div>
+
+            <div className="mt-2 relative">
+              <select
+                className="h-10 w-full appearance-none rounded-md border border-border bg-bg px-4 pr-10 rd-sub16 outline-none focus:ring-2 focus:ring-[color:rgba(0,0,0,0.06)]"
+                defaultValue="all"
+                aria-label="Factory"
+              >
+                <option value="all">ทุกโรงงาน</option>
+                <option value="A">โรงงาน A</option>
+                <option value="B">โรงงาน B</option>
+              </select>
+
+              {/* caret icon */}
+              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </div>
+            </div>
           </div>
+
         </div>
 
-        {/* Room cards grid (2 columns on desktop, 1 on mobile)
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {MOCK.map((r) => (
-            <div key={r.roomId} className="w-full">
-              <RoomCard {...r} />
-            </div>
-          ))}
-        </div> */}
         <div>
           {/* ...header... */}
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="mt-8 grid gap-6 grid-cols-1 min-[980px]:grid-cols-2">
             {filteredRooms.map((r) => (
-              <RoomCard key={r.roomId} {...r} />
+              <div key={r.roomId} className="min-w-0">
+                <RoomCard {...r} />
+              </div>
             ))}
           </div>
+
         </div>
       </div>
     </div>
