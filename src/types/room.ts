@@ -9,11 +9,12 @@ export type RoomSummary = {
   state: RoomState;
   tempC: number;
   humRH: number;
-  kilnOn: boolean;
+  furnanceOn: boolean;
 
   profileName?: string;
   hourNow?: number;
   hourTotal?: number;
+  startInText?: string;
   etaText?: string;
 
   lastUpdateText: string;

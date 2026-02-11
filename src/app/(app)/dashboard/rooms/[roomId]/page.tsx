@@ -12,7 +12,7 @@ const stateStyle: Record<RoomState, { label: string; cls: string }> = {
   FAULT: { label: "ขัดข้อง", cls: "border-red bg-redBg text-red" },
 };
 
-function CircleIconWrap({ kind, children }: { kind: "temp" | "hum" | "kiln"; children: React.ReactNode }) {
+function CircleIconWrap({ kind, children }: { kind: "temp" | "hum" | "furnance"; children: React.ReactNode }) {
   const cls =
     kind === "temp"
       ? "bg-[color:rgba(255,105,0,0.2)] text-orange"
@@ -150,7 +150,7 @@ export default function RoomDetailPage({ params }: { params: { roomId: string } 
               </div>
 
               <div className="flex items-center gap-4">
-                <CircleIconWrap kind="kiln">
+                <CircleIconWrap kind="furnance">
                   <FlameIcon />
                 </CircleIconWrap>
                 <div>

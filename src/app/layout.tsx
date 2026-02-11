@@ -18,7 +18,8 @@ const ibmPlexSansThai = IBM_Plex_Sans_Thai({
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="th" className={`${inter.variable} ${ibmPlexSansThai.variable}`}>
-      <body>{children}</body>
+      <body className="h-dvh overflow-hidden">{children}</body>
     </html>
   );
 }
+

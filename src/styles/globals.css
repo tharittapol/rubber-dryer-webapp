@@ -60,6 +60,7 @@ body{
   font-family: var(--font-thai), system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans Thai", sans-serif;
   background: var(--bg);
   color: var(--text);
+  overflow: hidden;
 }
 
 /* English blocks (and anything marked lang="en") use Inter */

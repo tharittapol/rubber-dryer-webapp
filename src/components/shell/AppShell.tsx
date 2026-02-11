@@ -251,9 +251,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [searchOpen, setSearchOpen] = React.useState(false);
 
   const Sidebar = (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-full flex flex-col">
       {/* Brand header */}
-      <div className="h-[84px] px-6 flex items-center border-b border-border">
+      <div className="h-[84px] px-6 flex items-center border-b border-border shrink-0">
         <div className="flex items-center gap-3">
           <Logo size={40} />
           {!collapsed && (
@@ -270,7 +270,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Nav sections */}
-      <nav className="p-6 flex-1">
+      <nav className="p-6 flex-1 min-h-0 overflow-y-auto">
         <div className="space-y-6">
           {navSections.map((sec) => (
             <div key={sec.title}>
@@ -286,7 +286,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </nav>
 
       {/* User card (bottom) */}
-      <div className={cn("p-6", collapsed && "px-3") + " mt-auto"}>
+      <div className={cn("p-6", collapsed && "px-3") + " shrink-0"}>
         <div className="rounded-md bg-surface p-4 flex items-center justify-between">
           <div className="min-w-0">
             <div className="text-[14px] font-semibold leading-[140%] truncate">สมชาย อินทะระชัย</div>
@@ -310,20 +310,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-bg text-text">
-      <div className="flex min-h-screen">
+    <div className="h-dvh overflow-hidden bg-bg text-text">
+      <div className="flex h-full overflow-hidden">
         <aside
           className={cn(
-            "hidden lg:block border-r border-border bg-bg transition-[width] duration-200 ease-out",
+            "hidden lg:block border-r border-border bg-bg transition-[width] duration-200 ease-out h-full overflow-hidden",
             collapsed ? "w-[84px]" : "w-[280px]"
           )}
         >
           {Sidebar}
         </aside>
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 h-full flex flex-col min-h-0">
           {/* Top header */}
-          <header className="h-[84px] border-b border-border bg-bg flex items-center justify-between px-6">
+          <header className="h-[84px] border-b border-border bg-bg flex items-center justify-between px-6 shrink-0">
             <div className="flex items-center gap-3">
               {/* Desktop collapse icon (design) */}
               <IconButton
@@ -364,7 +364,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <main className="px-4 sm:px-6 py-6">{children}</main>
+          <main className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-6">
+            {children}
+          </main>
         </div>
       </div>
 
@@ -372,7 +374,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-[color:rgba(0,0,0,0.25)]" onClick={() => setMobileOpen(false)} />
-          <div className="absolute left-0 top-0 h-full w-[280px] bg-bg border-r border-border shadow-soft">
+          <div className="absolute left-0 top-0 h-full w-[280px] bg-bg border-r border-border shadow-soft overflow-hidden">
             {Sidebar}
           </div>
         </div>
