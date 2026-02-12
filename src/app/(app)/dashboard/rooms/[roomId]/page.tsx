@@ -64,8 +64,14 @@ function FlameIcon() {
   );
 }
 
-export default function RoomDetailPage({ params }: { params: { roomId: string } }) {
-  // NOTE: This is mock data for the UI prototype. Replace with API data later.
+type Params = { roomId: string };
+
+export default async function RoomDetailPage({
+  params,
+}: {
+  params: Promise<Params>;
+}) {
+  const { roomId } = await params;
   const roomName = "ห้องอบ A1";
   const roomNo = "01";
   const factoryName = "โรงงาน A";
@@ -193,7 +199,7 @@ export default function RoomDetailPage({ params }: { params: { roomId: string } 
         </Card>
 
         {/* Hidden debug */}
-        <div className="sr-only">roomId: {params.roomId}</div>
+        <div className="sr-only">roomId: {roomId}</div>
       </div>
     </div>
   );

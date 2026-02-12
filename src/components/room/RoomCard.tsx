@@ -9,13 +9,13 @@ function fmt1(v: unknown): string {
   return n.toFixed(1);
 }
 
-type RoomState =
-  | "RUNNING"
-  | "WARM_HOLD"
-  | "READY"
-  | "WAITING"
-  | "STOPPED"
-  | "FAULT";
+// type RoomState =
+//   | "RUNNING"
+//   | "WARM_HOLD"
+//   | "READY"
+//   | "WAITING"
+//   | "STOPPED"
+//   | "FAULT";
 
 const STATE_UI: Record<RoomState, { label: string; cls: string }> = {
   RUNNING:   { label: "กำลังทำงาน",   cls: "bg-greenBg text-greenInk border-greenInk" },

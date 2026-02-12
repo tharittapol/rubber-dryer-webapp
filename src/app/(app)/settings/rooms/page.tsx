@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Card } from "@/components/ui/Card";
 
 export default function Page() {
