@@ -1,0 +1,85 @@
+{
+  "factories": [
+    {
+      "factoryId": "f-001",
+      "factoryName": "โรงงาน A"
+    },
+    {
+      "factoryId": "f-002",
+      "factoryName": "โรงงาน B"
+    }
+  ],
+  "rooms": [
+    {
+      "roomId": "room-1",
+      "roomName": "ห้องอบ A1",
+      "roomNo": "01",
+      "factoryId": "f-001",
+      "factoryName": "โรงงาน A",
+      "state": "READY",
+      "tempC": 29.2,
+      "humRH": 58.1,
+      "furnanceOn": false,
+      "lastUpdateText": "1 นาทีที่แล้ว"
+    },
+    {
+      "roomId": "room-2",
+      "roomName": "ห้องอบ A2",
+      "roomNo": "02",
+      "factoryId": "f-001",
+      "factoryName": "โรงงาน A",
+      "state": "RUNNING",
+      "tempC": 93.6,
+      "humRH": 43.0,
+      "furnanceOn": true,
+      "lastUpdateText": "1 นาทีที่แล้ว"
+    },
+    {
+      "roomId": "room-3",
+      "roomName": "ห้องอบ B1",
+      "roomNo": "01",
+      "factoryId": "f-002",
+      "factoryName": "โรงงาน B",
+      "state": "WAITING",
+      "tempC": 40.5,
+      "humRH": 50.2,
+      "furnanceOn": false,
+      "lastUpdateText": "5 นาทีที่แล้ว"
+    },
+    {
+      "roomId": "room-4",
+      "roomName": "ห้องอบ B2",
+      "roomNo": "02",
+      "factoryId": "f-002",
+      "factoryName": "โรงงาน B",
+      "state": "FAULT",
+      "tempC": 110.3,
+      "humRH": 8.6,
+      "furnanceOn": false,
+      "lastUpdateText": "10 วินาทีที่แล้ว"
+    }
+  ],
+  "profiles": [
+    {
+      "profileId": "p-std-48",
+      "profileName": "โปรไฟล์มาตรฐาน 48 ชม.",
+      "totalHours": 48,
+      "description": "เหมาะสำหรับอบยางทั่วไป",
+      "maxTempC": 60
+    },
+    {
+      "profileId": "p-fast-24",
+      "profileName": "โปรไฟล์เร่งด่วน 24 ชม.",
+      "totalHours": 24,
+      "description": "ต้องการความเร็วสูงขึ้น",
+      "maxTempC": 60
+    },
+    {
+      "profileId": "p-soft-60",
+      "profileName": "โปรไฟล์นุ่มนวล 60 ชม.",
+      "totalHours": 60,
+      "description": "ลดความเสี่ยงอุณหภูมิแกว่ง",
+      "maxTempC": 60
+    }
+  ]
+}
