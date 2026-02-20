@@ -29,13 +29,13 @@ function stateLabel(st: RoomState) {
 }
 
 function canStart(st: RoomState) {
-  return st === "READY" || st === "STOPPED" || st === "WAITING";
+  return st === "READY" || st === "STOPPED";
 }
 function canStop(st: RoomState) {
   return st === "RUNNING" || st === "WARM_HOLD" || st === "WAITING";
 }
 function canReset(st: RoomState) {
-  return st === "FAULT";
+  return st === "FAULT" || st === "STOPPED";
 }
 
 function actionEnabled(action: ControlActionId, room: ControlRoom | null) {
@@ -52,6 +52,36 @@ function pad2(n: number) {
 function nowHHMM() {
   const d = new Date();
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+function startHHMMToStartDate(startMode: "NOW" | "SCHEDULE", scheduleHHMM: string) {
+  const now = new Date();
+
+  if (startMode === "NOW") return now;
+
+  const { h, m } = hhmmToParts(scheduleHHMM);
+
+  const d = new Date(now);
+  d.setSeconds(0);
+  d.setMilliseconds(0);
+  d.setHours(h, m, 0, 0);
+
+  // If you select "Before now", it will be considered "tomorrow".
+  if (d.getTime() < now.getTime()) {
+    d.setDate(d.getDate() + 1);
+  }
+  return d;
+}
+
+function formatDateTimeTH(d: Date) {
+  // Example: 21 ก.พ. 2026 22:38
+  return d.toLocaleString("th-TH", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 }
 function hhmmToMinutes(hhmm: string) {
   const [h, m] = hhmm.split(":").map((x) => Number(x));
@@ -109,6 +139,408 @@ function hhmmToParts(v: string) {
 }
 function partsToHHMM(h: number, m: number) {
   return `${pad2(h)}:${pad2(m)}`;
+}
+
+/** =================== Action Modals (match figma screenshot) =================== */
+
+type ModalTone = "red" | "yellow" | "orange" | "green" | "gray";
+
+function toneStyles(tone: ModalTone) {
+  switch (tone) {
+    case "red":
+      return {
+        ring: "bg-[color:rgba(255,70,70,0.12)] border-[color:rgba(255,70,70,0.25)]",
+        title: "text-[color:#E43B3B]",
+        note: "text-[color:#C22E2E]",
+        btn: "bg-[color:#E43B3B] hover:bg-[color:#D73434] border-[color:#E43B3B] text-white",
+        iconBg: "bg-[color:rgba(255,70,70,0.10)] border-[color:rgba(255,70,70,0.25)]",
+        iconFg: "text-[color:#E43B3B]",
+      };
+    case "yellow":
+      return {
+        ring: "bg-[color:rgba(255,220,120,0.16)] border-[color:rgba(255,200,70,0.35)]",
+        title: "text-[color:#D07A00]",
+        note: "text-[color:#B96800]",
+        btn: "bg-[color:#FFB21A] hover:bg-[color:#F0A400] border-[color:#FFB21A] text-[color:#3B2A00]",
+        iconBg: "bg-[color:rgba(255,200,70,0.18)] border-[color:rgba(255,200,70,0.40)]",
+        iconFg: "text-[color:#D07A00]",
+      };
+    case "orange":
+      return {
+        ring: "bg-[color:rgba(255,140,40,0.12)] border-[color:rgba(255,140,40,0.25)]",
+        title: "text-[color:#FF7A00]",
+        note: "text-[color:#C95F00]",
+        btn: "bg-[color:#FF7A00] hover:bg-[color:#EE6F00] border-[color:#FF7A00] text-white",
+        iconBg: "bg-[color:rgba(255,140,40,0.12)] border-[color:rgba(255,140,40,0.30)]",
+        iconFg: "text-[color:#FF7A00]",
+      };
+    case "green":
+      return {
+        ring: "bg-[color:rgba(20,174,92,0.12)] border-[color:rgba(20,174,92,0.25)]",
+        title: "text-[color:#14AE5C]",
+        note: "text-[color:#0F8A4A]",
+        btn: "bg-[color:#14AE5C] hover:bg-[color:#109A51] border-[color:#14AE5C] text-white",
+        iconBg: "bg-[color:rgba(20,174,92,0.12)] border-[color:rgba(20,174,92,0.30)]",
+        iconFg: "text-[color:#14AE5C]",
+      };
+    default:
+      return {
+        ring: "bg-bg border-border",
+        title: "text-[color:#1F1F1F]",
+        note: "text-[color:#6B6B6B]",
+        btn: "bg-[color:#1F1F1F] hover:bg-[color:#111] border-[color:#1F1F1F] text-white",
+        iconBg: "bg-[color:rgba(0,0,0,0.04)] border-[color:rgba(0,0,0,0.10)]",
+        iconFg: "text-[color:#1F1F1F]",
+      };
+  }
+}
+
+function DialogShell({
+  open,
+  children,
+  onClose,
+}: {
+  open: boolean;
+  children: React.ReactNode;
+  onClose: () => void;
+}) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-[color:rgba(0,0,0,0.35)]" onClick={onClose} />
+      <div className="absolute inset-0 grid place-items-center p-4">
+        <div className="w-full max-w-[520px]">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function ProgressBar({ value01 }: { value01: number }) {
+  const v = clamp(value01, 0, 1);
+  return (
+    <div className="mt-2 h-2 w-full rounded-full bg-[color:rgba(0,0,0,0.10)] overflow-hidden">
+      <div className="h-full rounded-full bg-[color:#14AE5C]" style={{ width: `${Math.round(v * 100)}%` }} />
+    </div>
+  );
+}
+
+function IconCircle({
+  tone,
+  children,
+}: {
+  tone: ModalTone;
+  children: React.ReactNode;
+}) {
+  const s = toneStyles(tone);
+  return (
+    <div className={cn("h-12 w-12 rounded-full grid place-items-center border", s.iconBg)}>
+      <div className={cn("h-8 w-8 rounded-full grid place-items-center border", s.iconBg)}>
+        <div className={cn("text-[18px]", s.iconFg)}>{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function StopIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+function WarnIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M12 3l10 18H2L12 3z" />
+      <path d="M12 9v5" />
+      <path d="M12 17h.01" />
+    </svg>
+  );
+}
+function ResetIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 12a9 9 0 0 1 15.5-6.5" />
+      <path d="M18.5 5.5V3" />
+      <path d="M18.5 5.5H16" />
+      <path d="M21 12a9 9 0 0 1-15.5 6.5" />
+    </svg>
+  );
+}
+
+type ConfirmKind =
+  | "confirm_stop_danger"    // RUNNING
+  | "confirm_stop_warning1"  // WARM_HOLD
+  | "confirm_stop_warning2"  // WAITING
+  | "confirm_reset_danger"   // FAULT
+  | "confirm_reset_stop";    // STOPPED
+
+function resolveConfirmKind(action: ControlActionId, room: ControlRoom | null): ConfirmKind | null {
+  if (!room) return null;
+
+  if (action === "STOP") {
+    if (room.state === "RUNNING") return "confirm_stop_danger";
+    if (room.state === "WARM_HOLD") return "confirm_stop_warning1";
+    if (room.state === "WAITING") return "confirm_stop_warning2";
+    // เผื่อหลุดเงื่อนไข
+    return "confirm_stop_warning1";
+  }
+
+  if (action === "RESET") {
+    if (room.state === "FAULT") return "confirm_reset_danger";
+    if (room.state === "STOPPED") return "confirm_reset_stop";
+    // เผื่อหลุดเงื่อนไข
+    return "confirm_reset_stop";
+  }
+
+  return null;
+}
+
+function ConfirmActionModal({
+  open,
+  kind,
+  room,
+  onClose,
+  onConfirm,
+  confirming,
+}: {
+  open: boolean;
+  kind: ConfirmKind;
+  room: ControlRoom;
+  onClose: () => void;
+  onConfirm: () => void;
+  confirming: boolean;
+}) {
+  // data for progress
+  const hourNow = (room as any).hourNow ?? 0;
+  const hourTotal = (room as any).hourTotal ?? 0;
+  const progress01 = hourTotal > 0 ? clamp(hourNow / hourTotal, 0, 1) : 0;
+
+  // common rows
+  const roomName = room.roomName ?? "-";
+  const factoryName = room.factoryName ?? "-";
+
+  // config by kind
+  const cfg = (() => {
+    if (kind === "confirm_stop_danger") {
+      return {
+        tone: "red" as const,
+        icon: <StopIcon />,
+        title: "ยืนยันหยุดการทำงาน",
+        note: "คำเตือน: ห้องอบกำลังทำงานอยู่ หากหยุดการทำงานกะทันหันอาจทำให้คุณภาพพอลล์เสียหาย",
+        primaryText: "ยืนยันหยุดการทำงานทันที",
+        footerHint: "การดำเนินการนี้ไม่สามารถย้อนกลับได้",
+        midBadge: null,
+        progressText: `${hourNow} / ${hourTotal} ชม.`,
+      };
+    }
+    if (kind === "confirm_stop_warning1") {
+      return {
+        tone: "yellow" as const,
+        icon: <WarnIcon />,
+        title: "ยืนยันหยุดการทำงาน",
+        note: "คำเตือน: ห้องอบกำลังรักษาอุณหภูมิอยู่ หากหยุดการทำงานกะทันหันอาจทำให้คุณภาพพอลล์เสียหาย",
+        primaryText: "ยืนยันหยุดการทำงานทันที",
+        footerHint: "การดำเนินการนี้ไม่สามารถย้อนกลับได้",
+        midBadge: "กำลังรักษาอุณหภูมิ",
+        progressText: `${hourNow} / ${hourTotal} ชม.`,
+      };
+    }
+    // warning2 (WAITING)
+    return {
+      tone: "yellow" as const,
+      icon: <WarnIcon />,
+      title: "ยืนยันหยุดการทำงาน",
+      note: "คำเตือน: ห้องอบกำลังรอดำเนินการอยู่ หากหยุดการทำงานในตอนนี้ อาจมีผลต่อการเริ่มอบรอบใหม่",
+      primaryText: "ยืนยันหยุดการทำงานทันที",
+      footerHint: "การดำเนินการนี้ไม่สามารถย้อนกลับได้",
+      midBadge: "รอดำเนินการ",
+      progressText: `${hourNow} / ${hourTotal} ชม.`,
+    };
+  })();
+
+  const s = toneStyles(cfg.tone);
+
+  return (
+    <DialogShell open={open} onClose={onClose}>
+      <div className="relative rounded-2xl bg-bg border border-border shadow-soft overflow-hidden">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-3 top-3 h-9 w-9 rounded-full border border-border bg-bg hover:bg-surface grid place-items-center"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+
+        <div className="px-8 pt-8 pb-6 text-center">
+          <div className="mx-auto w-fit">
+            <IconCircle tone={cfg.tone}>{cfg.icon}</IconCircle>
+          </div>
+
+          <div className={cn("mt-4 text-[22px] font-semibold", s.title)}>{cfg.title}</div>
+          <div className={cn("mt-2 text-[12px] leading-[150%] px-2", s.note)}>{cfg.note}</div>
+
+          <div className="mt-5 rounded-xl bg-surface border border-border p-4 text-left">
+            <div className="grid grid-cols-2 gap-y-2 text-[12px]">
+              <div className="text-[color:#8A8A8A]">ห้องที่กำลังอบ:</div>
+              <div className="text-right font-semibold">{roomName}</div>
+
+              <div className="text-[color:#8A8A8A]">โรงงาน:</div>
+              <div className="text-right font-semibold">{factoryName}</div>
+
+              <div className="text-[color:#8A8A8A]">ชั่วโมงที่อบไปแล้ว:</div>
+              <div className="text-right font-semibold">{cfg.progressText}</div>
+            </div>
+
+            <ProgressBar value01={progress01} />
+
+            {cfg.midBadge ? (
+              <div className={cn("mt-2 text-center text-[12px] font-semibold", s.note)}>{cfg.midBadge}</div>
+            ) : null}
+          </div>
+
+          <div className="mt-5 flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={confirming}
+              className={cn(
+                "h-11 min-w-[140px] px-5 rounded-md border",
+                "border-[color:rgba(0,0,0,0.20)] bg-[#E9E9E9] text-[color:#4B4B4B]",
+                "hover:bg-[#DEDEDE]",
+                confirming && "opacity-60 cursor-not-allowed"
+              )}
+            >
+              ยกเลิก
+            </button>
+
+            <button
+              type="button"
+              onClick={onConfirm}
+              disabled={confirming}
+              className={cn(
+                "h-11 px-5 rounded-md border font-semibold",
+                s.btn,
+                confirming && "opacity-60 cursor-not-allowed"
+              )}
+            >
+              {confirming ? "กำลังส่งคำสั่ง..." : cfg.primaryText}
+            </button>
+          </div>
+
+          <div className="mt-3 text-[11px] text-[color:#8A8A8A]">{cfg.footerHint}</div>
+        </div>
+      </div>
+    </DialogShell>
+  );
+}
+
+function ConfirmResetModal({
+  open,
+  kind,
+  room,
+  onClose,
+  onConfirm,
+  confirming,
+}: {
+  open: boolean;
+  kind: "confirm_reset_danger" | "confirm_reset_stop";
+  room: ControlRoom;
+  onClose: () => void;
+  onConfirm: () => void;
+  confirming: boolean;
+}) {
+  const roomName = room.roomName ?? "-";
+  const factoryName = room.factoryName ?? "-";
+
+  const cfg =
+    kind === "confirm_reset_danger"
+      ? {
+          tone: "orange" as const,
+          title: "ยืนยันการรีเซ็ตห้องอบ",
+          desc: "คุณกำลังจะทำการรีเซ็ตระบบควบคุมสำหรับห้องอบที่ขัดข้อง",
+          badgeTone: "border-[color:rgba(255,70,70,0.35)] bg-[color:rgba(255,70,70,0.10)] text-[color:#C22E2E]",
+          badgeText: `ห้องที่ขัดข้อง: ${roomName} ${factoryName}`,
+          hint: "กรุณาตรวจสอบความปลอดภัยก่อนทำการรีเซ็ต",
+          primaryText: "ยืนยันรีเซ็ตระบบ",
+        }
+      : {
+          tone: "orange" as const,
+          title: "ยืนยันการรีเซ็ตห้องอบ",
+          desc: "คุณกำลังจะทำการรีเซ็ตเพื่อเตรียมความพร้อมสำหรับการอบรอบใหม่",
+          badgeTone: "border-[color:rgba(0,0,0,0.18)] bg-bg text-[color:#1F1F1F]",
+          badgeText: `ห้อง ${roomName} ${factoryName}\nสถานะปัจจุบัน: หยุดทำงาน`,
+          hint: "",
+          primaryText: "ยืนยันรีเซ็ตระบบ",
+        };
+
+  const s = toneStyles(cfg.tone);
+
+  return (
+    <DialogShell open={open} onClose={onClose}>
+      <div className="relative rounded-2xl bg-bg border border-border shadow-soft overflow-hidden">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-3 top-3 h-9 w-9 rounded-full border border-border bg-bg hover:bg-surface grid place-items-center"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+
+        <div className="px-8 pt-8 pb-6 text-center">
+          <div className="mx-auto w-fit">
+            <IconCircle tone={cfg.tone}>
+              <ResetIcon />
+            </IconCircle>
+          </div>
+
+          <div className={cn("mt-4 text-[22px] font-semibold", "text-[color:#1F1F1F]")}>{cfg.title}</div>
+          <div className="mt-2 text-[12px] text-[color:#6B6B6B]">{cfg.desc}</div>
+
+          <div className={cn("mt-5 rounded-xl border p-4 text-left text-[12px] whitespace-pre-line", cfg.badgeTone)}>
+            {cfg.badgeText}
+          </div>
+
+          {cfg.hint ? (
+            <div className="mt-3 rounded-lg bg-[color:rgba(43,127,255,0.10)] border border-[color:rgba(43,127,255,0.20)] px-3 py-2 text-left text-[12px] text-[color:#2B7FFF]">
+              ℹ️ {cfg.hint}
+            </div>
+          ) : null}
+
+          <div className="mt-5 flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={confirming}
+              className={cn(
+                "h-11 min-w-[140px] px-5 rounded-md border",
+                "border-[color:rgba(0,0,0,0.20)] bg-[#E9E9E9] text-[color:#4B4B4B]",
+                "hover:bg-[#DEDEDE]",
+                confirming && "opacity-60 cursor-not-allowed"
+              )}
+            >
+              ยกเลิก
+            </button>
+
+            <button
+              type="button"
+              onClick={onConfirm}
+              disabled={confirming}
+              className={cn(
+                "h-11 px-6 rounded-md border font-semibold",
+                s.btn,
+                confirming && "opacity-60 cursor-not-allowed"
+              )}
+            >
+              {confirming ? "กำลังส่งคำสั่ง..." : cfg.primaryText}
+            </button>
+          </div>
+        </div>
+      </div>
+    </DialogShell>
+  );
 }
 
 /** =================== TimeWheelPicker =================== */
@@ -314,7 +746,7 @@ function WheelColumn<T extends number>({
 }
 
 /** ====== Stepper ====== */
-function Stepper({ step }: { step: StepId }) {
+function Stepper({ step, totalSteps }: { step: StepId; totalSteps: 2 | 3 }) {
   const doneCls = "bg-[color:#14AE5C] text-white border-[color:#14AE5C]";
   const activeCls = "bg-[color:#14AE5C] text-white border-[color:#14AE5C]";
   const idleCls = "bg-[#E9E9E9] text-[color:#6B6B6B] border-[#E9E9E9]";
@@ -324,13 +756,26 @@ function Stepper({ step }: { step: StepId }) {
   const Node = ({ n }: { n: 1 | 2 | 3 }) => {
     const isDone = step > n;
     const isActive = step === n;
+
+    // If totalSteps=2, then step 3 will not exist.
     const cls = isDone ? doneCls : isActive ? activeCls : idleCls;
+
     return (
       <div className={cn("h-11 w-11 rounded-full grid place-items-center border text-[16px] font-semibold", cls)}>
         {isDone ? "✓" : n}
       </div>
     );
   };
+
+  if (totalSteps === 2) {
+    return (
+      <div className="flex items-center justify-center gap-4">
+        <Node n={1} />
+        <div className={cn("h-[3px] w-24 rounded-full", step >= 2 ? lineActive : lineIdle)} />
+        <Node n={2} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center gap-4">
@@ -568,39 +1013,70 @@ function ShiftHours({ value, onChange }: { value: number; onChange: (v: number) 
   );
 }
 
-/** ====== Modal (kept for STOP/RESET confirm + success) ====== */
+/** ====== Modal ====== */
+function ModalBadge({ variant }: { variant: "start" | "success" }) {
+  const isSuccess = variant === "success";
+
+  return (
+    <div
+      className={cn(
+        "mx-auto h-14 w-14 rounded-full grid place-items-center",
+        isSuccess
+          ? "bg-[color:rgba(20,174,92,0.14)] border border-[color:rgba(20,174,92,0.35)] text-[color:#14AE5C]"
+          : "bg-[color:rgba(20,174,92,0.14)] border border-[color:rgba(20,174,92,0.35)] text-[color:#14AE5C]"
+      )}
+      aria-hidden
+    >
+      {isSuccess ? (
+        // check
+        <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <path d="M20 6 9 17l-5-5" />
+        </svg>
+      ) : (
+        // notice
+        // <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2.5">
+        //   <path d="M7 11V8a5 5 0 0 1 10 0v3" />
+        //   <rect x="6" y="11" width="12" height="10" rx="2" />
+        // </svg>
+        <img src="/icons/Notice.svg" alt="Notice" className="h-12 w-12" />
+      )}
+    </div>
+  );
+}
+
 function ModalShell({
   open,
-  title,
   children,
   onClose,
 }: {
   open: boolean;
-  title: string;
   children: React.ReactNode;
   onClose: () => void;
 }) {
   if (!open) return null;
+
   return (
     <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-[color:rgba(0,0,0,0.25)]" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-[color:rgba(0,0,0,0.55)]"
+        onClick={onClose}
+      />
       <div className="absolute inset-0 grid place-items-center p-4">
-        <div className="w-full max-w-[640px]">
-          <Card className="shadow-soft">
-            <div className="flex items-center justify-between gap-3">
-              <div className="text-[18px] font-semibold">{title}</div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="h-9 w-9 rounded-sm border border-border bg-bg hover:bg-surface grid place-items-center"
-                aria-label="Close"
-                title="Close"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="mt-4">{children}</div>
-          </Card>
+        <div className="w-full max-w-[720px]">
+          <div className="relative rounded-2xl bg-white shadow-soft border border-[color:rgba(0,0,0,0.08)] overflow-hidden">
+            {/* close */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute right-4 top-4 h-9 w-9 rounded-full border border-[color:rgba(0,0,0,0.12)] bg-white hover:bg-[color:rgba(0,0,0,0.03)] grid place-items-center"
+              aria-label="Close"
+              title="Close"
+            >
+              ✕
+            </button>
+
+            <div className="p-8 sm:p-10">{children}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -620,13 +1096,15 @@ export function ControlWizard() {
 
   const [selectedAction, setSelectedAction] = React.useState<ControlActionId | null>(null);
 
-  // ✅ picker state (single source for picker initial value)
+  // picker state (single source for picker initial value)
   const [pickerValue, setPickerValue] = React.useState<string>(nowHHMM());
   const [timePickerOpen, setTimePickerOpen] = React.useState(false);
 
+  const [startConfirmOpen, setStartConfirmOpen] = React.useState(false);
+
   const openTimePickerNow = React.useCallback(() => {
     const now = nowHHMM();
-    setPickerValue(now); // ✅ always start at now
+    setPickerValue(now); // always start at now
     setTimePickerOpen(true);
   }, []);
 
@@ -647,6 +1125,10 @@ export function ControlWizard() {
     if (!data || !startForm.profileId) return null;
     return data.profiles.find((p) => p.profileId === startForm.profileId) ?? null;
   }, [data, startForm.profileId]);
+
+  const summaryProfileName = selectedProfile?.profileName ?? "-";
+  const summaryFactoryName = selectedRoom?.factoryName ?? "-";
+  const summaryRoomName = selectedRoom?.roomName ?? "-";
 
   const [modalOpen, setModalOpen] = React.useState(false);
   const [successOpen, setSuccessOpen] = React.useState(false);
@@ -696,6 +1178,7 @@ export function ControlWizard() {
 
   const closeAll = () => {
     setModalOpen(false);
+    setStartConfirmOpen(false);
     setSuccessOpen(false);
     setSubmitting(false);
   };
@@ -706,6 +1189,7 @@ export function ControlWizard() {
     setSelectedRoomId(null);
     setFactoryId("all");
     setRoomQuery("");
+    setStartConfirmOpen(false);
     setStartForm({ profileId: null, startMode: "NOW", scheduleHHMM: nowHHMM(), shiftHours: 0 });
     setPickerValue(nowHHMM());
     setTimePickerOpen(false);
@@ -741,10 +1225,13 @@ export function ControlWizard() {
       return;
     }
 
+    // step 3 -> open confirm modal (START only)
     if (!selectedRoom || selectedAction !== "START") return;
     if (!startForm.profileId) return;
     if (startForm.startMode === "SCHEDULE" && !startForm.scheduleHHMM) return;
-    submit();
+
+    setStartConfirmOpen(true);
+    return;
   };
 
   const goBack = () => {
@@ -765,10 +1252,31 @@ export function ControlWizard() {
 
   const modalPrimaryDisabled = submitting || !selectedRoom || !selectedAction;
 
-  const step3StartHHMM = startForm.startMode === "NOW" ? nowHHMM() : startForm.scheduleHHMM;
-  const step3StartM = hhmmToMinutes(step3StartHHMM);
   const totalHours = selectedProfile?.totalHours ?? 0;
-  const endHHMM = minutesToHHMM(step3StartM + Math.round(totalHours * 60));
+
+  const startDate = startHHMMToStartDate(startForm.startMode, startForm.scheduleHHMM);
+  const endDate = new Date(startDate.getTime() + Math.round(totalHours * 60) * 60_000);
+
+  const endDateTimeText = formatDateTimeTH(endDate);
+
+  const stepperTotal: 2 | 3 = React.useMemo(() => {
+    // If you're at step 3 = it's definitely a START flow.
+    if (step === 3) return 3;
+
+    // You are in step 1/2:
+    // If you select STOP/RESET, it will leave 2 steps as shown in the image.
+    if (selectedAction && selectedAction !== "START") return 2;
+
+    // Default (no action selected or START selected) -> 3 steps
+    return 3;
+  }, [step, selectedAction]);
+
+  const summaryStartText =
+    startForm.startMode === "NOW"
+      ? formatDateTimeTH(new Date())
+      : formatDateTimeTH(startHHMMToStartDate("SCHEDULE", startForm.scheduleHHMM));
+
+  const summaryEndText = endDateTimeText;
 
   const step3LeftInfo = startForm.startMode === "NOW" ? "จะเริ่มในตอนนี้" : diffTextFromNowToHHMM(startForm.scheduleHHMM);
   const step3RightInfo = endsInText(totalHours, startForm.startMode, startForm.scheduleHHMM);
@@ -785,7 +1293,7 @@ export function ControlWizard() {
       <div className="flex flex-col gap-6">
         <div className="relative">
           <div className={cn(step === 1 ? "mt-6" : "mt-2", "flex justify-center")}>
-            <Stepper step={step} />
+            <Stepper step={step} totalSteps={stepperTotal} />
           </div>
         </div>
 
@@ -996,7 +1504,14 @@ export function ControlWizard() {
                         </button>
                       </div>
 
-                      <TimeField label="เวลาสิ้นสุด" valueHHMM={endHHMM} disabled />
+                      <div className="min-w-0">
+                        <div className="text-[14px] font-semibold text-[color:#3B3B3B]">เวลาสิ้นสุด</div>
+                        <input
+                          className="mt-2 h-11 w-full rounded-md border border-border bg-[#EFEFEF] px-4 text-[14px] text-[color:#7A7A7A]"
+                          value={endDateTimeText}
+                          readOnly
+                        />
+                      </div>
 
                       <ShiftHours value={startForm.shiftHours} onChange={(v) => setStartForm((prev) => ({ ...prev, shiftHours: v }))} />
                     </div>
@@ -1053,67 +1568,140 @@ export function ControlWizard() {
         )}
       </div>
 
-      {/* STOP/RESET confirm modal */}
+      {/* =================== STOP/RESET confirm (state-based) =================== */}
+      {(() => {
+        const kind = resolveConfirmKind(selectedAction ?? "STOP", selectedRoom);
+        if (!kind || !selectedRoom) return null;
+
+        // STOP modals (แดง/เหลืองตาม state)
+        if (kind.startsWith("confirm_stop")) {
+          return (
+            <ConfirmActionModal
+              open={modalOpen}
+              kind={kind as any}
+              room={selectedRoom}
+              confirming={submitting}
+              onClose={() => {
+                if (submitting) return;
+                setModalOpen(false);
+              }}
+              onConfirm={submit}
+            />
+          );
+        }
+
+        // RESET modals (ส้มตาม state)
+        return (
+          <ConfirmResetModal
+            open={modalOpen}
+            kind={kind as any}
+            room={selectedRoom}
+            confirming={submitting}
+            onClose={() => {
+              if (submitting) return;
+              setModalOpen(false);
+            }}
+            onConfirm={submit}
+          />
+        );
+      })()}
+
       <ModalShell
-        open={modalOpen}
-        title={modalTitle}
+        open={startConfirmOpen}
         onClose={() => {
           if (submitting) return;
-          setModalOpen(false);
+          setStartConfirmOpen(false);
         }}
       >
-        <div className="space-y-4">
-          <div className="rounded-md border border-border bg-surface p-4">
-            <div className="text-[12px] text-muted">สรุป</div>
-            <div className="mt-1 text-[14px]">
-              <span className="font-semibold">ห้อง:</span> {selectedRoom?.roomName ?? "-"}
-            </div>
-            <div className="mt-1 text-[14px]">
-              <span className="font-semibold">คำสั่ง:</span> {selectedAction ?? "-"}
+        <div className="text-center">
+          <ModalBadge variant="start" />
+
+          <div className="mt-5 text-[20px] sm:text-[22px] font-semibold text-[color:#1F1F1F]">
+            ยืนยันเริ่มการอบ
+          </div>
+          <div className="mt-2 text-[14px] text-[color:#6B6B6B]">
+            ตรวจสอบข้อมูลให้ถูกต้องก่อนเริ่มการอบ
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-[color:rgba(0,0,0,0.03)] p-5 text-left">
+            <div className="grid grid-cols-2 gap-y-2 text-[14px]">
+              <div className="text-[color:#6B6B6B]">ห้องที่เลือก:</div>
+              <div className="font-semibold text-right">{summaryRoomName}</div>
+
+              <div className="text-[color:#6B6B6B]">โรงงาน:</div>
+              <div className="font-semibold text-right">{summaryFactoryName}</div>
+
+              <div className="text-[color:#6B6B6B]">โปรไฟล์:</div>
+              <div className="font-semibold text-right text-[color:#14AE5C]">{summaryProfileName}</div>
+
+              <div className="text-[color:#6B6B6B]">เวลาเริ่ม:</div>
+              <div className="font-semibold text-right">{summaryStartText}</div>
+
+              <div className="text-[color:#6B6B6B]">เวลาสิ้นสุด:</div>
+              <div className="font-semibold text-right">{summaryEndText}</div>
             </div>
           </div>
 
-          <div className="rounded-md border border-border bg-bg p-4 text-[14px]">
-            ต้องการ{selectedAction === "STOP" ? "หยุด" : "รีเซ็ต"}ห้องนี้ใช่ไหม?
-          </div>
+          <div className="mt-7 flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => setStartConfirmOpen(false)}
+              disabled={submitting}
+              className={cn(
+                "h-11 min-w-[160px] rounded-md border px-5 text-[14px] font-semibold",
+                "border-[color:rgba(0,0,0,0.25)] bg-[color:rgba(0,0,0,0.06)] hover:bg-[color:rgba(0,0,0,0.10)]",
+                submitting && "opacity-60 cursor-not-allowed"
+              )}
+            >
+              ตรวจสอบอีกครั้ง
+            </button>
 
-          <div className="flex items-center justify-end gap-2">
-            <Button variant="ghost" onClick={() => setModalOpen(false)} disabled={submitting}>
-              ยกเลิก
-            </Button>
-            <Button variant="solid" onClick={submit} disabled={modalPrimaryDisabled}>
-              {submitting ? "กำลังส่งคำสั่ง..." : "ยืนยัน"}
-            </Button>
+            <button
+              type="button"
+              onClick={async () => {
+                setStartConfirmOpen(false);
+                await submit();
+              }}
+              disabled={submitting}
+              className={cn(
+                "h-11 min-w-[160px] rounded-md px-6 text-[14px] font-semibold text-white",
+                "bg-[color:#14AE5C] hover:bg-[color:#109A51]",
+                submitting && "opacity-60 cursor-not-allowed"
+              )}
+            >
+              {submitting ? "กำลังส่งคำสั่ง..." : "เริ่มการอบ"}
+            </button>
           </div>
         </div>
       </ModalShell>
 
-      {/* success modal */}
       <ModalShell
         open={successOpen}
-        title="ส่งคำสั่งสำเร็จ"
         onClose={() => {
           closeAll();
           resetWizard();
         }}
       >
-        <div className="space-y-4">
-          <div className="rounded-md bg-[color:rgba(20,174,92,0.12)] border border-[color:rgba(20,174,92,0.25)] p-4">
-            <div className="text-[14px] font-semibold text-[color:#0F8A4A]">ระบบได้รับคำสั่งแล้ว</div>
-            <div className="mt-1 text-[14px] text-[color:#0F8A4A]">(Mock) จะเชื่อม API จริงภายหลัง</div>
+        <div className="text-center">
+          <ModalBadge variant="success" />
+
+          <div className="mt-5 text-[22px] font-semibold text-[color:#14AE5C]">
+            ดำเนินการสำเร็จ
+          </div>
+          <div className="mt-2 text-[14px] text-[color:#6B6B6B]">
+            ระบบได้รับคำสั่งของคุณและดำเนินการเรียบร้อยแล้ว
           </div>
 
-          <div className="flex items-center justify-end">
-            <Button
-              variant="solid"
-              onClick={() => {
-                closeAll();
-                resetWizard();
-              }}
-            >
-              ปิด
-            </Button>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              closeAll();
+              resetWizard();
+            }}
+            className="mt-7 h-12 w-full rounded-md bg-[color:#14AE5C] text-white font-semibold hover:bg-[color:#109A51]"
+          >
+            ตกลง
+          </button>
         </div>
       </ModalShell>
     </div>
