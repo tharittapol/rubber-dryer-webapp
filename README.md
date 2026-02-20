@@ -10,6 +10,9 @@ Web project outline (Desktop + Mobile responsive)
 npm install
 npm run dev
 ```
+```bash
+docker compose -f docker-compose.dev.yml up
+```
 
 open http://localhost:3000
 
