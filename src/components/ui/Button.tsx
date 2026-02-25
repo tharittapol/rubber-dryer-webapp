@@ -1,7 +1,7 @@
 import * as React from "react";
 import { cn } from "@/lib/cn";
 
-type Variant = "primary" | "ghost" | "danger";
+type Variant = "primary" | "secondary" | "ghost" | "success" | "danger";
 type Size = "md" | "sm" | "figma40";
 
 /**
@@ -20,14 +20,17 @@ export function Button({
 
   const variants: Record<Variant, string> = {
     primary: "border-ink bg-ink text-white hover:opacity-90",
+    // ใช้กับปุ่ม “ยกเลิก” ที่เป็นสีเทาอ่อนในดีไซน์
+    secondary: "border-border bg-surface text-text hover:bg-surface2",
     ghost: "border-border bg-bg text-text hover:bg-surface",
+    // ปุ่มเขียวตามดีไซน์ “สร้างห้องอบใหม่ / ตกลง”
+    success: "border-greenInk bg-greenInk text-white hover:opacity-90",
     danger: "border-red bg-red text-white hover:opacity-90",
   };
 
   const sizes: Record<Size, string> = {
     md: "h-[46px] px-4 text-[16px] leading-[140%]",
     sm: "h-[40px] px-3 text-[14px] leading-[140%]",
-    // Figma login: height 40 + line-height 100% (single-line)
     figma40: "h-[40px] px-4 text-[16px] leading-[100%]",
   };
 
