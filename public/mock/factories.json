@@ -1,0 +1,28 @@
+{
+  "factories": [
+    {
+      "id": "fac-chiangmai-1",
+      "name": "โรงงานเชียงใหม่",
+      "addressLine": "123 หมู่ 4",
+      "province": "เชียงใหม่",
+      "district": "เมือง",
+      "subdistrict": "ช้างเผือก",
+      "postcode": "50300",
+      "roomsCount": 8,
+      "note": "Text Emphasis",
+      "updatedAt": "2024-05-20T10:00:00.000Z"
+    },
+    {
+      "id": "fac-chiangmai-2",
+      "name": "โรงงานเชียงใหม่",
+      "addressLine": "123 หมู่ 4",
+      "province": "เชียงใหม่",
+      "district": "เมือง",
+      "subdistrict": "ช้างเผือก",
+      "postcode": "50300",
+      "roomsCount": 8,
+      "note": "Text Emphasis",
+      "updatedAt": "2024-05-20T10:00:00.000Z"
+    }
+  ]
+}
