@@ -134,6 +134,110 @@ function ModalShell({
   );
 }
 
+function ConfirmModalShell({
+  title,
+  subtitle,
+  onClose,
+  icon,
+  tone = "default",
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  onClose: () => void;
+  icon: React.ReactNode;
+  tone?: "default" | "danger" | "success";
+  children: React.ReactNode;
+}) {
+  const titleCls =
+    tone === "danger" ? "text-red" : tone === "success" ? "text-greenInk" : "text-text";
+
+  const subCls =
+    tone === "danger" ? "text-red" : tone === "success" ? "text-muted" : "text-muted";
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-[color:rgba(0,0,0,0.25)]" onClick={onClose} />
+
+      <div className="relative h-full w-full px-4 py-6 sm:py-10 flex items-center justify-center">
+        <div className="w-full max-w-[980px] rounded-[24px] bg-bg shadow-soft">
+          <div className="relative px-8 sm:px-14 pt-10 sm:pt-14 pb-10 sm:pb-12">
+            {/* close */}
+            <button
+              className="absolute right-6 top-6 h-12 w-12 rounded-full border border-border bg-bg hover:bg-surface grid place-items-center"
+              onClick={onClose}
+              aria-label="Close"
+              title="Close"
+              type="button"
+            >
+              <CloseX />
+            </button>
+
+            {/* icon */}
+            <div className="flex justify-center">{icon}</div>
+
+            {/* title/subtitle */}
+            <div className={cn("text-[40px] font-semibold leading-[120%] text-center", titleCls)}>{title}</div>
+            {subtitle ? (
+              <div className={cn("mt-3 text-[18px] text-center whitespace-pre-line", subCls)}>{subtitle}</div>
+            ) : null}
+
+            {/* actions */}
+            <div className="mt-10">{children}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmWarnIcon() {
+  return (
+    <div className="grid place-items-center">
+      <div className="h-[84px] w-[84px] rounded-full bg-[color:rgba(0,0,0,0.06)] grid place-items-center">
+        <div className="h-[64px] w-[64px] rounded-full border-2 border-[color:rgba(0,0,0,0.35)] grid place-items-center">
+          <span className="text-[28px] font-bold text-text">!</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmDangerIcon() {
+  return (
+    <div className="grid place-items-center">
+      {/* outer soft ring */}
+      <div className="h-[84px] w-[84px] rounded-full bg-[color:rgba(236,34,31,0.18)] grid place-items-center">
+        {/* middle ring */}
+        <div className="h-[64px] w-[64px] rounded-full bg-red grid place-items-center">
+          {/* inner ring */}
+          <div className="h-[42px] w-[42px] rounded-full border-[3px] border-white grid place-items-center">
+            <span className="text-[22px] font-extrabold text-white leading-none">!</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmSuccessIcon() {
+  return (
+    <div className="grid place-items-center">
+      {/* outer soft ring */}
+      <div className="h-[84px] w-[84px] rounded-full bg-[color:rgba(20,174,92,0.18)] grid place-items-center">
+        {/* middle solid */}
+        <div className="h-[64px] w-[64px] rounded-full bg-greenInk grid place-items-center">
+          {/* inner ring + check */}
+          <div className="h-[42px] w-[42px] rounded-full border-[3px] border-white grid place-items-center">
+            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="white" strokeWidth="3" aria-hidden="true">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return <div className="text-[14px] text-muted leading-[140%]">{children}</div>;
 }
@@ -283,7 +387,12 @@ export default function RoomsSettingsPage() {
   function goConfirmSave() {
     const err = validate();
     setFormError(err);
-    if (!err) setModal("confirmSave");
+    if (err) return;
+    if (!activeId) {
+      doSave();
+      return;
+    }
+    setModal("confirmSave");
   }
 
   function doSave() {
@@ -336,7 +445,7 @@ export default function RoomsSettingsPage() {
           </div>
 
           <Button variant="success" className="h-[46px] rounded-sm" onClick={openCreate} type="button">
-            <span className="inline-flex items-center justify-center h-5 w-5 rounded-sm border border-[color:rgba(255,255,255,0.35)]">
+            <span className="inline-flex items-center justify-center h-5 w-5 -sm border border-greenInk">
               +
             </span>
             สร้างห้องอบใหม่
@@ -465,60 +574,88 @@ export default function RoomsSettingsPage() {
       )}
 
       {modal === "confirmSave" && (
-        <ModalShell title="บันทึกการแก้ไข" subtitle="คุณต้องการบันทึกการใช่หรือไม่?" onClose={() => setModal("none")}>
-          <div className="space-y-6">
-            <div className="flex justify-center">
-              <WarnIcon />
-            </div>
-            <div className="pt-2 flex items-center justify-between gap-3">
-              <Button variant="secondary" className="w-full sm:w-[240px]" onClick={() => setModal(activeId ? "edit" : "create")}>
-                ยกเลิก
-              </Button>
-              <Button className="w-full sm:w-[240px]" onClick={doSave}>ยืนยัน</Button>
-            </div>
+        <ConfirmModalShell
+          title="บันทึกการแก้ไข"
+          subtitle="คุณต้องการบันทึกการนี้ใช่หรือไม่?"
+          onClose={() => setModal("none")}
+          icon={<ConfirmWarnIcon />}
+        >
+          <div className="flex flex-col sm:flex-row items-stretch justify-center gap-6">
+            <Button
+              variant="secondary"
+              className="w-full sm:w-[360px] h-[64px] rounded-[14px] text-[20px]"
+              onClick={() => setModal(activeId ? "edit" : "create")}
+            >
+              ยกเลิก
+            </Button>
+
+            <Button
+              variant="primary"
+              className="w-full sm:w-[360px] h-[64px] rounded-[14px] text-[20px]"
+              onClick={doSave}
+            >
+              ยืนยัน
+            </Button>
           </div>
-        </ModalShell>
+        </ConfirmModalShell>
       )}
 
       {modal === "confirmDelete" && (
-        <ModalShell
+        <ConfirmModalShell
+          tone="danger"
           title="ยืนยันการลบ"
           subtitle={`การลบนี้จะถูกลบออกจากระบบอย่างถาวร\nไม่สามารถกู้คืนได้ คุณแน่ใจหรือไม่ว่าต้องการลบ?`}
           onClose={() => setModal("none")}
+          icon={<ConfirmDangerIcon />}
         >
-          <div className="space-y-6">
-            <div className="flex justify-center">
-              <DangerIcon />
-            </div>
+          <div className="flex flex-col sm:flex-row items-stretch justify-center gap-6">
+            <Button
+              variant="secondary"
+              className="w-full sm:w-[360px] h-[64px] rounded-[14px] text-[20px]"
+              onClick={() => setModal("none")}
+            >
+              ยกเลิก
+            </Button>
 
-            <div className="pt-2 flex items-center justify-between gap-3">
-              <Button variant="secondary" className="w-full sm:w-[240px]" onClick={() => setModal("none")}>
-                ยกเลิก
-              </Button>
-              <Button variant="danger" className="w-full sm:w-[240px]" onClick={doDelete}>ยืนยัน</Button>
-            </div>
+            <Button
+              variant="danger"
+              className="w-full sm:w-[360px] h-[64px] rounded-[14px] text-[20px]"
+              onClick={doDelete}
+            >
+              ยืนยัน
+            </Button>
           </div>
-        </ModalShell>
+
+          {/* สีตัวอักษรแดงตามดีไซน์ (เฉพาะ title+subtitle) */}
+          <style jsx>{`
+            :global(.text-text) {
+              color: inherit;
+            }
+          `}</style>
+        </ConfirmModalShell>
       )}
 
       {modal === "success" && (
-        <ModalShell title="" onClose={() => setModal("none")}>
-          <div className="space-y-6 text-center">
-            <div className="flex justify-center">
-              <SuccessIcon />
-            </div>
-            <div className="text-[28px] font-semibold leading-[120%] text-greenInk">{successText.title}</div>
-            <div className="text-muted">{successText.subtitle}</div>
-            <div className="pt-2">
-              <Button variant="success" className="w-full" onClick={() => {
-                  setModal("none");
-                  setActiveId(null);
-                }}>
-                ตกลง
-              </Button>
-            </div>
+        <ConfirmModalShell
+          tone="success"
+          title={successText.title}
+          subtitle={successText.subtitle}
+          onClose={() => setModal("none")}
+          icon={<ConfirmSuccessIcon />}
+        >
+          <div className="flex justify-center">
+            <Button
+              variant="success"
+              className="w-full h-[64px] rounded-[14px] text-[20px] max-w-[760px]"
+              onClick={() => {
+                setModal("none");
+                setActiveId(null);
+              }}
+            >
+              ตกลง
+            </Button>
           </div>
-        </ModalShell>
+        </ConfirmModalShell>
       )}
     </div>
   );
