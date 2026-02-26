@@ -20,10 +20,8 @@ export function Button({
 
   const variants: Record<Variant, string> = {
     primary: "border-ink bg-ink text-white hover:opacity-90",
-    // ใช้กับปุ่ม “ยกเลิก” ที่เป็นสีเทาอ่อนในดีไซน์
     secondary: "border-border bg-surface text-text hover:bg-surface2",
     ghost: "border-border bg-bg text-text hover:bg-surface",
-    // ปุ่มเขียวตามดีไซน์ “สร้างห้องอบใหม่ / ตกลง”
     success: "border-greenInk bg-greenInk text-white hover:opacity-90",
     danger: "border-red bg-red text-white hover:opacity-90",
   };

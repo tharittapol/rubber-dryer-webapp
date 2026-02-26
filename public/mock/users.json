@@ -1,0 +1,38 @@
+{
+  "factories": ["โรงงานเชียงใหม่", "โรงงานลำปาง", "โรงงานยะลา"],
+  "users": [
+    {
+      "id": "u-1",
+      "fullName": "สมชาย อินทะระวิชัย",
+      "username": "admin01",
+      "password": "12345678",
+      "email": "admin@example.com",
+      "phone": "0812364498",
+      "lineId": "KOJBL",
+      "role": "ADMIN",
+      "factories": ["โรงงานเชียงใหม่", "โรงงานลำปาง", "โรงงานยะลา"]
+    },
+    {
+      "id": "u-2",
+      "fullName": "สมชาย อินทะระวิชัย",
+      "username": "somsai.oper",
+      "password": "12563458",
+      "email": "admin@example.com",
+      "phone": "0813659852",
+      "lineId": "SKNHIL123",
+      "role": "USER",
+      "factories": ["โรงงานเชียงใหม่", "โรงงานลำปาง", "โรงงานยะลา"]
+    },
+    {
+      "id": "u-3",
+      "fullName": "สมชาย อินทะระวิชัย",
+      "username": "somsai.view",
+      "password": "98546213",
+      "email": "admin@example.com",
+      "phone": "0615698956",
+      "lineId": "SHoikp369",
+      "role": "VIEWER",
+      "factories": ["โรงงานเชียงใหม่", "โรงงานลำปาง", "โรงงานยะลา"]
+    }
+  ]
+}
