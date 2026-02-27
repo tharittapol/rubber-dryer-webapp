@@ -1,18 +1,15 @@
-/**
- * Prototype auth helpers for UI development.
- *
- * Production recommendation:
- * - Use httpOnly cookies for refresh token
- * - Validate session server-side
- * - Apply RBAC (ADMIN/USER/VIEWER/OPERATOR)
- */
-export const AUTH_COOKIE = "rd_token";
-
 export function setAuthCookie(token: string) {
-  // Prototype-only: client-side cookie. Replace with httpOnly cookie in production.
-  document.cookie = `${AUTH_COOKIE}=${token}; path=/; max-age=${60 * 60 * 12}`;
+  document.cookie = `rd_auth=${encodeURIComponent(token)}; path=/; SameSite=Lax`;
 }
 
 export function clearAuthCookie() {
-  document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0`;
+  document.cookie = `rd_auth=; path=/; Max-Age=0; SameSite=Lax`;
+}
+
+export function setRoleCookie(role: "ADMIN" | "USER" | "VIEWER") {
+  document.cookie = `rd_role=${encodeURIComponent(role)}; path=/; SameSite=Lax`;
+}
+
+export function clearRoleCookie() {
+  document.cookie = `rd_role=; path=/; Max-Age=0; SameSite=Lax`;
 }

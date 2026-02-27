@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/cn";
 
+import { ensureUsersStore, readUsersStore, writeUsersStore, type UserRow, type Role } from "@/lib/mockUsersStore";
+
 type Role = "ADMIN" | "USER" | "VIEWER";
 
 type UserRow = {
@@ -385,15 +387,10 @@ export default function UsersSettingsPage() {
     let mounted = true;
     (async () => {
       try {
-        const res = await fetch("/mock/users.json", { cache: "no-store" });
-        const json = (await res.json()) as UsersMock;
+        const data = await ensureUsersStore();
         if (!mounted) return;
-        setUsers(json.users ?? []);
-        setFactories(json.factories ?? []);
-      } catch {
-        if (!mounted) return;
-        setUsers([]);
-        setFactories([]);
+        setUsers(data.users);
+        setFactories(data.factories);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -460,8 +457,8 @@ export default function UsersSettingsPage() {
     return null;
   }
 
-  // ✅ Create: save ทันที -> success
-  // ✅ Edit: confirm ก่อน
+  // Create: save now -> success
+  // Edit: confirm before
   function onSaveClick() {
     const err = validate();
     setFormError(err);
@@ -485,23 +482,37 @@ export default function UsersSettingsPage() {
       phone: phone.trim(),
       lineId: lineId.trim(),
       role: (rolePick as Role) ?? "USER",
-      factories: factoryPick,
+      factories: factoryPick.trim() ? [factoryPick.trim()] : [],
     };
 
+    const current = readUsersStore();
+
+    const nextUsers = activeId
+      ? current.users.map((u) => (u.id === activeId ? payload : u))
+      : [payload, ...current.users];
+
+    const nextStore = { ...current, users: nextUsers };
+    writeUsersStore(nextStore);
+
+    setUsers(nextUsers);
+
     if (activeId) {
-      setUsers((prev) => prev.map((u) => (u.id === activeId ? payload : u)));
       setSuccessText({ title: "บันทึกการแก้ไขสำเร็จแล้ว", subtitle: "ข้อมูลได้รับการอัปเดตเรียบร้อย" });
     } else {
-      setUsers((prev) => [payload, ...prev]);
       setSuccessText({ title: "เพิ่มผู้ใช้งานใหม่สำเร็จแล้ว", subtitle: "ข้อมูลได้รับการอัปเดตเรียบร้อย" });
     }
-
     setModal("success");
   }
 
   function doDelete() {
     if (!activeId) return;
-    setUsers((prev) => prev.filter((u) => u.id !== activeId));
+
+    const current = readUsersStore();
+    const nextUsers = current.users.filter((u) => u.id !== activeId);
+
+    writeUsersStore({ ...current, users: nextUsers });
+    setUsers(nextUsers);
+
     setSuccessText({ title: "ลบสำเร็จ", subtitle: "ข้อมูลถูกลบออกจากระบบเรียบร้อย" });
     setModal("success");
   }

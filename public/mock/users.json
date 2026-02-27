@@ -1,4 +1,5 @@
 {
+  "seedVersion": "2026-02-27-01",
   "factories": ["โรงงานเชียงใหม่", "โรงงานลำปาง", "โรงงานยะลา"],
   "users": [
     {
@@ -15,9 +16,9 @@
     {
       "id": "u-2",
       "fullName": "สมชาย อินทะระวิชัย",
-      "username": "somsai.oper",
-      "password": "12563458",
-      "email": "admin@example.com",
+      "username": "user01",
+      "password": "12345678",
+      "email": "user@example.com",
       "phone": "0813659852",
       "lineId": "SKNHIL123",
       "role": "USER",
@@ -26,9 +27,9 @@
     {
       "id": "u-3",
       "fullName": "สมชาย อินทะระวิชัย",
-      "username": "somsai.view",
-      "password": "98546213",
-      "email": "admin@example.com",
+      "username": "viewer01",
+      "password": "12345678",
+      "email": "viewer@example.com",
       "phone": "0615698956",
       "lineId": "SHoikp369",
       "role": "VIEWER",
