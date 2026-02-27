@@ -3,6 +3,9 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import type { RoomState, RoomSummary } from "@/types/room";
 
+const TXT20 = "text-base lg:text-[20px]";
+const LEAD20 = "leading-[130%] lg:leading-[120%]";
+
 function fmt1(v: unknown): string {
   const n = typeof v === "number" ? v : Number(v);
   if (!Number.isFinite(n)) return "--";
@@ -93,17 +96,42 @@ function Metric({
 
   return (
     <div className="flex items-center gap-2">
-      <div className={"h-[46px] w-[46px] rounded-[8px] grid place-items-center " + iconWrapCls}>
-        <img
-          src={iconSrc}
-          alt=""
-          className="w-6 h-6 object-contain"
-        />
+      <div className={"h-10 w-10 lg:h-[46px] lg:w-[46px] rounded-[8px] grid place-items-center " + iconWrapCls}>
+        <img src={iconSrc} alt="" className="w-5 h-5 lg:w-6 lg:h-6 object-contain" />
       </div>
 
       <div className="flex flex-col items-start">
-        <div className={"text-[20px] font-semibold leading-[120%] " + valueCls}>{value}</div>
-        <div className="text-[16px] font-normal leading-[140%] text-muted">{unit}</div>
+        <div className={"font-semibold " + LEAD20 + " " + TXT20 + " " + valueCls}>{value}</div>
+        <div className={"text-sm lg:text-[16px] font-normal leading-[140%] text-muted"}>{unit}</div>
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({
+  label,
+  value,
+  valueCls = "text-ink",
+}: {
+  label: string;
+  value: React.ReactNode;
+  valueCls?: string;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-2 min-w-0">
+      {/* Left: Do not shrink */}
+      <div className="shrink-0 text-base lg:text-[20px] font-normal leading-[130%] lg:leading-[120%] text-muted">
+        {label}
+      </div>
+
+      {/* Right: Keep to the right + Allow wrapping + No cutting… */}
+      <div
+        className={
+          "min-w-0 flex-1 text-right text-base lg:text-[20px] font-normal leading-[130%] lg:leading-[120%] break-words whitespace-normal " +
+          valueCls
+        }
+      >
+        {value}
       </div>
     </div>
   );
@@ -125,31 +153,33 @@ export function RoomCard(room: RoomSummary) {
     <Link href={`/dashboard/rooms/${encodeURIComponent(room.roomId)}`} className="block">
       <Card className="shadow-none flex flex-col gap-4 h-full">
         {/* Header */}
-        <div className="flex items-start justify-between gap-6 w-full">
-          <div className="min-w-0 flex flex-col gap-2">
-            <div className="text-[24px] font-semibold leading-[120%] tracking-[-0.02em] text-ink truncate">
+        <div className="w-full min-w-0">
+          {/* Row 1: title + badge (same row) */}
+          <div className="flex items-center justify-between gap-3 min-w-0">
+            <div className="min-w-0 text-lg lg:text-[24px] font-semibold leading-[120%] tracking-[-0.02em] text-ink truncate">
               {room.roomName}
             </div>
 
-            <div className="text-[20px] font-normal leading-[120%] text-muted truncate">
-              ห้อง {room.roomNo} | โรงงาน {room.factoryName}
-            </div>
+            <Badge className={"h-7 lg:h-8 px-2.5 lg:px-3 py-1 lg:py-1.5 shrink-0 " + st.cls}>
+              <span className="text-[14px] leading-none font-normal">{st.label}</span>
+            </Badge>
           </div>
 
-          <Badge className={"h-8 px-3 py-2 " + st.cls}>
-            <span className="text-[16px] leading-[100%] font-normal">{st.label}</span>
-          </Badge>
+          {/* Row 2: room no + factory name (for long name) */}
+          <div className="mt-1 text-base lg:text-[20px] font-normal leading-[130%] text-muted break-words">
+            ห้อง {room.roomNo} | โรงงาน {room.factoryName}
+          </div>
         </div>
 
         {/* Metrics */}
-        <div className="w-full flex items-center justify-between gap-4">
+        <div className="w-full flex flex-wrap items-center justify-between gap-3 lg:gap-4">
           <Metric kind="temp" value={fmt1(room.tempC)} unit="°C" />
           <Metric kind="hum" value={fmt1(room.humRH)} unit="%RH" />
           <Metric kind="furnance" value={room.furnanceOn ? "เปิด" : "ปิด"} unit="เตา" active={room.furnanceOn} />
         </div>
 
         {/* Details */}
-        <div className="w-full rounded-[8px] bg-[#F5F5F5] p-3">
+        <div className="w-full rounded-[8px] bg-[#F5F5F5] p-2.5 lg:p-3">
           {normalizeState(room.state) === "FAULT" && room.alarmText ? (
             <div className="rounded-[8px] bg-redBg p-3 text-red font-semibold text-[20px] leading-[120%]">
               <div className="flex items-center gap-3 text-red">
@@ -164,42 +194,33 @@ export function RoomCard(room: RoomSummary) {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between gap-6">
-                <div className="text-[20px] font-normal leading-[120%] text-muted">โปรไฟล์:</div>
-                <div className="text-[20px] font-normal leading-[120%] text-ink text-right truncate">
-                  {room.profileName ?? "-"}
-                </div>
-              </div>
+            <div className="flex flex-col gap-2.5">
+              <DetailRow label="โปรไฟล์:" value={room.profileName ?? "-"} />
 
-              <div className="flex items-center justify-between gap-6">
-                <div className="text-[20px] font-normal leading-[120%] text-muted">ชั่วโมงที่:</div>
-                <div className="text-[20px] font-normal leading-[120%] text-ink text-right">
-                  {room.hourNow != null && room.hourTotal != null ? `${room.hourNow} / ${room.hourTotal}` : "-"}
-                </div>
-              </div>
+              <DetailRow
+                label="ชั่วโมงที่:"
+                value={room.hourNow != null && room.hourTotal != null ? `${room.hourNow} / ${room.hourTotal}` : "-"}
+              />
 
               {showWaiting && (
-                <div className="flex items-center justify-between gap-6">
-                  <div className="text-[20px] font-normal leading-[120%] text-muted">จะเริ่มในอีก:</div>
-                  <div className="text-[20px] font-normal leading-[120%] text-[#009951] text-right">
-                    {startInHas ? startInRaw : "-"}
-                  </div>
-                </div>
+                <DetailRow
+                  label="จะเริ่มในอีก:"
+                  value={startInHas ? startInRaw : "-"}
+                  valueCls="text-[#009951]"
+                />
               )}
 
-              <div className="flex items-center justify-between gap-6">
-                <div className="text-[20px] font-normal leading-[120%] text-muted">คาดว่าเสร็จ:</div>
-                <div className={"text-[20px] font-normal leading-[120%] text-right " + etaCls}>
-                  {etaText}
-                </div>
-              </div>
+              <DetailRow
+                label="คาดว่าเสร็จ:"
+                value={etaText}
+                valueCls={etaHas ? "text-[#009951]" : "text-ink"}
+              />
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="mt-auto flex items-center gap-2 text-[16px] font-normal leading-[140%] text-muted">
+        <div className="mt-auto flex items-center gap-2 text-sm lg:text-[16px] font-normal leading-[140%] text-muted">
           <span className="text-muted">
             <ClockIcon />
           </span>
