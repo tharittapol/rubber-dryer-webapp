@@ -41,18 +41,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       lastUpdateText: "5 นาทีที่แล้ว",
     },
     {
-      roomId: "room-3",
-      roomName: "ห้องอบ C3",
-      roomNo: "03",
-      factoryName: "สมุทรปราการ",
-      state: "FAULT",
-      tempC: 100.1,
-      humRH: 5.8,
-      furnanceOn: false,
-      lastUpdateText: "1 นาทีที่แล้ว",
-      alarmText: "อุณหภูมิสูงเกินกำหนด",
-    },
-    {
       roomId: "room-4",
       roomName: "ห้องอบ D4",
       roomNo: "04",
@@ -94,6 +82,18 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       furnanceOn: false,
       profileName: "-",
       lastUpdateText: "5 นาทีที่แล้ว",
+    },
+    {
+      roomId: "room-7",
+      roomName: "ห้องอบ G7",
+      roomNo: "07",
+      factoryName: "สมุทรปราการ",
+      state: "FAULT",
+      tempC: 100.1,
+      humRH: 5.8,
+      furnanceOn: false,
+      lastUpdateText: "1 นาทีที่แล้ว",
+      alarmText: "อุณหภูมิสูงเกินกำหนด",
     },
     
   ];

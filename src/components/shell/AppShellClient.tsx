@@ -5,11 +5,19 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { clearAuthCookie, clearRoleCookie } from "@/lib/auth";
 import * as React from "react";
-import { Logo } from "@/components/brand/Logo";
+import { Logo, LogoAppShell } from "@/components/brand/Logo";
 import Image from "next/image";
 
+import HomeSvg from "@/assets/icons/home.svg";
+import SlidersSvg from "@/assets/icons/slider.svg";
+import ListSvg from "@/assets/icons/list.svg";
+import FactorySvg from "@/assets/icons/factory.svg";
+import HouseSvg from "@/assets/icons/room.svg";
+import UserSvg from "@/assets/icons/user.svg";
+import LogoutSvg from "@/assets/icons/logout.svg";
+
 type Role = "ADMIN" | "USER" | "VIEWER";
-type NavItem = { href: string; label: string; icon: React.ReactNode };
+type NavItem = { href: string; label: string; icon: (active: boolean) => React.ReactNode };
 
 function readClientUser(): { fullName: string; role: Role } | null {
   if (typeof window === "undefined") return null;
@@ -51,84 +59,57 @@ export function AppShellClient({ children }: { children: React.ReactNode }) {
     return <span className="h-5 w-5 inline-flex items-center justify-center">{children}</span>;
   }
 
-  function HomeIcon() {
+  function HomeIcon({ active }: { active: boolean }) {
     return (
       <IconWrap>
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M3 10.5 12 3l9 7.5" />
-          <path d="M5 10v10h14V10" />
-        </svg>
+        <HomeSvg className={cn("h-5 w-5", active ? "text-white" : "text-text")} />
       </IconWrap>
     );
   }
-  function SlidersIcon() {
+  function SlidersIcon({ active }: { active: boolean }) {
     return (
       <IconWrap>
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M4 21v-7" />
-          <path d="M4 10V3" />
-          <path d="M12 21v-9" />
-          <path d="M12 8V3" />
-          <path d="M20 21v-5" />
-          <path d="M20 12V3" />
-          <path d="M2 14h4" />
-          <path d="M10 8h4" />
-          <path d="M18 12h4" />
-        </svg>
+        <SlidersSvg className={cn("h-5 w-5", active ? "text-white" : "text-text")} />
       </IconWrap>
     );
   }
-  function ListIcon() {
+
+  function ListIcon({ active }: { active: boolean }) {
     return (
       <IconWrap>
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M8 6h13" />
-          <path d="M8 12h13" />
-          <path d="M8 18h13" />
-          <path d="M3 6h.01" />
-          <path d="M3 12h.01" />
-          <path d="M3 18h.01" />
-        </svg>
+        <ListSvg className={cn("h-3 w-5", active ? "text-white" : "text-text")} />
       </IconWrap>
     );
   }
-  function FactoryIcon() {
+
+  function FactoryIcon({ active }: { active: boolean }) {
     return (
       <IconWrap>
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M3 21V9l6 3V9l6 3V9l6 3v9H3Z" />
-        </svg>
+        <FactorySvg className={cn("h-5 w-5", active ? "text-white" : "text-text")} />
       </IconWrap>
     );
   }
-  function HouseIcon() {
+
+  function HouseIcon({ active }: { active: boolean }) {
     return (
       <IconWrap>
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M3 10.5 12 3l9 7.5" />
-          <path d="M6 10v11h12V10" />
-        </svg>
+        <HouseSvg className={cn("h-5 w-5", active ? "text-white" : "text-text")} />
       </IconWrap>
     );
   }
-  function UserIcon() {
+
+  function UserIcon({ active }: { active: boolean }) {
     return (
       <IconWrap>
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M20 21a8 8 0 1 0-16 0" />
-          <path d="M12 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" />
-        </svg>
+        <UserSvg className={cn("h-5 w-5", active ? "text-white" : "text-text")} />
       </IconWrap>
     );
   }
+
   function LogoutIcon() {
     return (
       <IconWrap>
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M16 17l5-5-5-5" />
-          <path d="M21 12H9" />
-          <path d="M12 19H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h7" />
-        </svg>
+        <LogoutSvg className="h-5 w-5 text-text" />
       </IconWrap>
     );
   }
@@ -155,7 +136,7 @@ export function AppShellClient({ children }: { children: React.ReactNode }) {
         aria-label={alt}
         title={alt}
       >
-        <Image src={src} alt={alt} width={20} height={20} />
+        <Image src={src} alt={alt} width={25} height={25} />
       </button>
     );
   }
@@ -208,7 +189,7 @@ export function AppShellClient({ children }: { children: React.ReactNode }) {
   }: {
     href: string;
     label: string;
-    icon: React.ReactNode;
+    icon: (active: boolean) => React.ReactNode;
     collapsed: boolean;
   }) {
     const pathname = usePathname();
@@ -218,14 +199,14 @@ export function AppShellClient({ children }: { children: React.ReactNode }) {
       <Link
         href={href}
         className={cn(
-          "h-10 w-full flex items-center gap-3 rounded-sm px-3 border border-transparent transition",
+          "h-10 w-full flex items-center gap-3 rounded-sm border border-transparent transition",
           active ? "bg-ink text-white" : "text-text hover:bg-surface",
-          collapsed && "justify-center px-0"
+          collapsed ? "justify-center px-0" : "px-3"
         )}
         title={collapsed ? label : undefined}
         aria-label={collapsed ? label : undefined}
       >
-        <span className={cn(active ? "text-white" : "text-text")}>{icon}</span>
+        {icon(active)}
         {!collapsed && <span className={cn(active ? "font-semibold" : "font-normal")}>{label}</span>}
       </Link>
     );
@@ -249,7 +230,17 @@ export function AppShellClient({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
 
-  // ✅ อ่าน user/role จาก localStorage
+  React.useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)"); // lg
+    const apply = () => {
+      if (!mq.matches) setCollapsed(false); // mobile/tablet -> ห้าม collapsed
+    };
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  // อ่าน user/role จาก localStorage
   const [me, setMe] = React.useState<{ fullName: string; role: Role } | null>(null);
 
   React.useEffect(() => {
@@ -264,17 +255,17 @@ export function AppShellClient({ children }: { children: React.ReactNode }) {
       {
         title: "เมนูหลัก",
         items: [
-          { href: "/dashboard", label: "หน้าหลัก", icon: <HomeIcon /> },
-          { href: "/control", label: "ควบคุม", icon: <SlidersIcon /> },
+          { href: "/dashboard", label: "หน้าหลัก", icon: (active) => <HomeIcon active={active} /> },
+          { href: "/control", label: "ควบคุม", icon: (a) => <SlidersIcon active={a} /> },
         ],
       },
       {
         title: "ตั้งค่าระบบ",
         items: [
-          { href: "/settings/profiles", label: "โปรไฟล์อุณหภูมิ", icon: <ListIcon /> },
-          { href: "/settings/factories", label: "ตั้งค่าโรงงาน", icon: <FactoryIcon /> },
-          { href: "/settings/rooms", label: "ตั้งค่าห้องอบ", icon: <HouseIcon /> },
-          { href: "/settings/users", label: "ตั้งค่าผู้ใช้งาน", icon: <UserIcon /> },
+          { href: "/settings/profiles", label: "โปรไฟล์อุณหภูมิ", icon: (a) => <ListIcon active={a} /> },
+          { href: "/settings/factories", label: "ตั้งค่าโรงงาน", icon: (a) => <FactoryIcon active={a} /> },
+          { href: "/settings/rooms", label: "ตั้งค่าห้องอบ", icon: (a) => <HouseIcon active={a} /> },
+          { href: "/settings/users", label: "ตั้งค่าผู้ใช้งาน", icon: (a) => <UserIcon active={a} /> },
         ],
       },
     ];
@@ -285,61 +276,101 @@ export function AppShellClient({ children }: { children: React.ReactNode }) {
       .filter((sec) => sec.items.length > 0);
   }, [me]);
 
-  const Sidebar = (
-    <div className="h-full flex flex-col">
-      <div className="h-[84px] px-6 flex items-center border-b border-border shrink-0">
-        <div className="flex items-center gap-3">
-          <Logo size={40} />
-          {!collapsed && (
-            <div className="min-w-0">
-              <div className="text-[16px] font-semibold leading-[120%] truncate">
-                <span lang="en">Rubber Dryer System</span>
+  const Sidebar = ({ forceExpanded }: { forceExpanded?: boolean }) => {
+    const c = forceExpanded ? false : collapsed; // mobile drawer force expanded
+
+    return (
+      <div className="h-full flex flex-col">
+        {/* Brand header */}
+        <div className={cn(
+          "h-[84px] flex items-center border-b border-border shrink-0",
+          c ? "px-0 justify-center" : "px-6"
+        )}>
+          <div className={cn("flex items-center gap-3", c && "gap-0")}>
+            <LogoAppShell size={40} />
+            {!c && (
+              <div className="min-w-0">
+                <div className="text-[16px] font-semibold leading-[120%] truncate">
+                  <span lang="en">Rubber Dryer System</span>
+                </div>
+                <div className="text-[14px] text-muted leading-[140%] truncate">
+                  ระบบควบคุมห้องอบยางพารา
+                </div>
               </div>
-              <div className="text-[14px] text-muted leading-[140%] truncate">ระบบควบคุมห้องอบยางพารา</div>
+            )}
+          </div>
+        </div>
+
+        {/* Nav sections */}
+        <nav className={cn("flex-1 min-h-0 overflow-y-auto", c ? "py-6 px-2" : "p-6")}>
+          <div className={cn("space-y-6", c && "space-y-5")}>
+            {navSections.map((sec) => (
+              <div key={sec.title} className={cn(c && "flex flex-col items-center")}>
+                {/* title show both collapsed and expanded */}
+                <div
+                  className={cn(
+                    "text-[12px] leading-[140%] text-muted mb-2 whitespace-nowrap overflow-hidden",
+                    collapsed ? "px-1 text-center truncate" : "truncate"
+                  )}
+                  title={sec.title}
+                >
+                  {sec.title}
+                </div>
+
+                <div className={cn("space-y-2", c && "w-full flex flex-col items-center")}>
+                  {sec.items.map((it) => (
+                    <NavLink key={it.href} href={it.href} label={it.label} icon={it.icon} collapsed={c} />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </nav>
+
+        {/* Bottom */}
+        <div className={cn("shrink-0", c ? "p-4" : "p-6")}>
+          {c ? (
+            <div className="flex justify-center">
+              <button
+                className="h-12 w-12 grid place-items-center rounded-md bg-surface hover:bg-[rgba(0,0,0,0.06)] active:translate-y-[1px]"
+                onClick={() => {
+                  clearAuthCookie();
+                  clearRoleCookie();
+                  localStorage.removeItem("rd_auth_user");
+                  window.location.href = "/login";
+                }}
+                aria-label="Logout"
+                title="Logout"
+              >
+                <LogoutIcon />
+              </button>
+            </div>
+          ) : (
+            <div className="rounded-md bg-surface p-4 flex items-center justify-between">
+              <div className="min-w-0">
+                <div className="text-[14px] font-semibold leading-[140%] truncate">{me?.fullName ?? "-"}</div>
+                <div className="text-[12px] text-muted leading-[140%] truncate">{me ? roleLabel(me.role) : "-"}</div>
+              </div>
+
+              <button
+                className="h-10 w-10 grid place-items-center rounded-sm border border-transparent hover:bg-surface active:translate-y-[1px]"
+                onClick={() => {
+                  clearAuthCookie();
+                  clearRoleCookie();
+                  localStorage.removeItem("rd_auth_user");
+                  window.location.href = "/login";
+                }}
+                aria-label="Logout"
+                title="Logout"
+              >
+                <LogoutIcon />
+              </button>
             </div>
           )}
         </div>
       </div>
-
-      <nav className="p-6 flex-1 min-h-0 overflow-y-auto">
-        <div className="space-y-6">
-          {navSections.map((sec) => (
-            <div key={sec.title}>
-              <div className="text-[12px] leading-[140%] text-muted mb-2">{sec.title}</div>
-              <div className="space-y-2">
-                {sec.items.map((it) => (
-                  <NavLink key={it.href} href={it.href} label={it.label} icon={it.icon} collapsed={collapsed} />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </nav>
-
-      <div className={cn("p-6", collapsed && "px-3") + " shrink-0"}>
-        <div className="rounded-md bg-surface p-4 flex items-center justify-between">
-          <div className="min-w-0">
-            <div className="text-[14px] font-semibold leading-[140%] truncate">{me?.fullName ?? "-"}</div>
-            <div className="text-[12px] text-muted leading-[140%] truncate">{me ? roleLabel(me.role) : "-"}</div>
-          </div>
-
-          <button
-            className="h-10 w-10 rounded-sm border border-border bg-bg hover:bg-surface grid place-items-center"
-            onClick={() => {
-              clearAuthCookie();
-              clearRoleCookie();
-              localStorage.removeItem("rd_auth_user");
-              window.location.href = "/login";
-            }}
-            aria-label="Logout"
-            title="Logout"
-          >
-            <LogoutIcon />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="h-dvh overflow-hidden bg-bg text-text">
@@ -350,7 +381,7 @@ export function AppShellClient({ children }: { children: React.ReactNode }) {
             collapsed ? "w-[84px]" : "w-[280px]"
           )}
         >
-          {Sidebar}
+          <Sidebar />
         </aside>
 
         <div className="flex-1 min-w-0 h-full flex flex-col min-h-0">
@@ -358,7 +389,7 @@ export function AppShellClient({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-3">
               <IconButton
                 src={collapsed ? "/icons/expand.svg" : "/icons/collapse.svg"}
-                alt={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                alt={collapsed ? "ขยายแถบด้านข้าง" : "ยุบแถบด้านข้าง"}
                 onClick={() => setCollapsed((v) => !v)}
                 className="hidden lg:grid"
               />
@@ -397,7 +428,7 @@ export function AppShellClient({ children }: { children: React.ReactNode }) {
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-[color:rgba(0,0,0,0.25)]" onClick={() => setMobileOpen(false)} />
           <div className="absolute left-0 top-0 h-full w-[280px] bg-bg border-r border-border shadow-soft overflow-hidden">
-            {Sidebar}
+            <Sidebar forceExpanded />
           </div>
         </div>
       )}
