@@ -1,188 +1,300 @@
+import * as React from "react";
+import { cn } from "@/lib/cn";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import type { RoomState } from "@/types/room";
 
+function RoomMetricSvg({ kind, active }: { kind: "temp" | "hum" | "furnance"; active?: boolean }) {
+  const src =
+    kind === "temp"
+      ? "/icons/temp.svg"
+      : kind === "hum"
+        ? "/icons/humid.svg"
+        : active
+          ? "/icons/furnaceOn.svg"
+          : "/icons/furnaceOff.svg";
+
+  return (
+    <img
+      src={src}
+      alt=""
+      // mobile: 24, desktop: 40
+      className="w-6 h-6 sm:w-10 sm:h-10 object-contain"
+    />
+  );
+}
+
+function RoomBadge({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) {
+  return (
+    <Badge
+      className={cn(
+        // Figma tag: h32, px12, py8, gap8, line-height 100%, radius 9999
+        "h-8 px-3 py-2 text-[16px] leading-[100%] rounded-full inline-flex items-center justify-center gap-2 whitespace-nowrap",
+        className
+      )}
+      {...props}
+    />
+  );
+}
+
+function RoomCard({
+  variant = "default",
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & { variant?: "default" | "rounded24" | "table" }) {
+  const v =
+    variant === "rounded24"
+      ? "rounded-3xl" // 24px
+      : "rounded-2xl"; // 16px (table/history)
+  return <Card className={cn("shadow-none bg-white", v, className)} {...props} />;
+}
+
 const stateStyle: Record<RoomState, { label: string; cls: string }> = {
-  RUNNING: { label: "กำลังทำงาน", cls: "border-green bg-greenBg text-greenInk" },
-  WARM_HOLD: { label: "รักษาอุณหภูมิ", cls: "border-orange bg-orangeBg text-orangeInk" },
-  READY: { label: "พร้อมทำงาน", cls: "border-blue bg-[color:rgba(43,127,255,0.15)] text-blue" },
-  WAITING: { label: "รอดำเนินการ", cls: "border-orange bg-[color:rgba(255,105,0,0.12)] text-orangeInk" },
-  STOPPED: { label: "หยุดทำงาน", cls: "border-border bg-surface text-muted" },
-  FAULT: { label: "ขัดข้อง", cls: "border-red bg-redBg text-red" },
+  RUNNING: {
+    label: "กำลังทำงาน",
+    cls: "bg-[rgba(20,174,92,0.2)] text-[#009951] border-[#14AE5C]",
+  },
+  FAULT: {
+    label: "ขัดข้อง",
+    cls: "bg-[rgba(192,15,12,0.2)] text-[#EC221F] border-[#EC221F]",
+  },
+  WARM_HOLD: {
+    label: "รักษาอุณหภูมิ",
+    cls: "bg-[rgba(255,105,0,0.2)] text-[#FF6900] border-[#FF6900]",
+  },
+  WAITING: {
+    label: "รอดำเนินการ",
+    cls: "bg-[rgba(232,185,49,0.2)] text-[#BF6A02] border-[#975102]",
+  },
+  READY: {
+    label: "พร้อมทำงาน",
+    cls: "bg-[rgba(43,127,255,0.2)] text-[#2B7FFF] border-[#2B7FFF]",
+  },
+  STOPPED: {
+    label: "หยุดทำงาน",
+    cls: "bg-[#F5F5F5] text-[#2C2C2C] border-[#767676]",
+  },
 };
 
-function CircleIconWrap({ kind, children }: { kind: "temp" | "hum" | "furnance"; children: React.ReactNode }) {
+function CircleIconWrap({
+  kind,
+  active = true,
+  children,
+}: {
+  kind: "temp" | "hum" | "furnance";
+  active?: boolean;
+  children: React.ReactNode;
+}) {
   const cls =
     kind === "temp"
-      ? "bg-[color:rgba(255,105,0,0.2)] text-orange"
+      ? "bg-[color:rgba(255,105,0,0.2)]"
       : kind === "hum"
-        ? "bg-[color:rgba(43,127,255,0.2)] text-blue"
-        : "bg-[color:rgba(20,174,92,0.2)] text-greenInk";
-  return <div className={"h-16 w-16 rounded-full grid place-items-center " + cls}>{children}</div>;
-}
+        ? "bg-[color:rgba(43,127,255,0.2)]"
+        : active
+          ? "bg-[color:rgba(20,174,92,0.2)]"
+          : "bg-[#F5F5F5]";
 
-function ThermometerIcon() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M14 14.76V5a2 2 0 0 0-4 0v9.76a4 4 0 1 0 4 0Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <div
+      className={
+        // mobile: 48x48, desktop: 64x64
+        "grid place-items-center rounded-full " +
+        "h-12 w-12 sm:h-16 sm:w-16 " +
+        cls
+      }
+    >
+      {children}
+    </div>
   );
 }
 
-function DropIcon() {
+function ActivityIcon() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M12 2s6 7 6 12a6 6 0 1 1-12 0c0-5 6-12 6-12Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <img src="/icons/state.svg" alt="" className="w-6 h-6 lg:w-6 lg:h-6 object-contain" />
   );
 }
 
-function FlameIcon() {
+function ClockIcon() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M12 2c2.5 3 3 5.5 2 8 2-.5 4-2.5 4-5 3 3 4 7 2.5 11A7.5 7.5 0 1 1 6 9c0 3 2 5 4 6-1-3 .5-6 2-13Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <img src="/icons/clock.svg" alt="" className="w-4 h-4 lg:w-4 lg:h-4 object-contain" />
+  );
+}
+
+const HISTORY_COLS = "grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(72px,0.6fr)]";
+
+function InfoPair({
+  label,
+  value,
+  valueClassName = "",
+}: {
+  label: string;
+  value: React.ReactNode;
+  valueClassName?: string;
+}) {
+  return (
+    <div className="min-w-0">
+      {/* Figma label: 20px / mobile ลดเหลือ 16 */}
+      <div className="text-[16px] sm:text-[20px] leading-[120%] text-muted">{label}</div>
+
+      {/* Figma value: 28px / mobile ลด */}
+      <div className={"mt-2 text-[20px] sm:text-[28px] font-semibold leading-[120%] " + valueClassName}>
+        {value}
+      </div>
+    </div>
   );
 }
 
 type Params = { roomId: string };
 
-export default async function RoomDetailPage({
-  params,
-}: {
-  params: Promise<Params>;
-}) {
+export default async function RoomDetailPage({ params }: { params: Promise<Params> }) {
   const { roomId } = await params;
+
+  // mock
   const roomName = "ห้องอบ A1";
   const roomNo = "01";
   const factoryName = "โรงงาน A";
   const state: RoomState = "RUNNING";
+  const furnanceOn = true;
 
   const st = stateStyle[state];
 
   return (
     <div className="w-full">
-      <div className="mx-auto max-w-[1112px]">
-        <div className="flex items-center justify-between gap-6">
-          <div className="min-w-0">
-            <Link href="/dashboard" className="inline-flex items-center gap-2 text-[20px] leading-[120%] text-muted">
-              <span aria-hidden>←</span>
-              <span>ย้อนกลับ</span>
-            </Link>
+      <div className="w-full">
+        {/* Back button (Frame 52) */}
+        <div className="pt-6">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-2 text-[16px] leading-[100%] text-[#303030]"
+          >
+            <span aria-hidden><img src="/icons/leftArrow.svg" alt="" className="w-3 h-3 lg:w-3 lg:h-3 object-contain" /></span>
+            <span>ย้อนกลับ</span>
+          </Link>
+        </div>
 
-            <div className="mt-6 text-[24px] font-semibold leading-[120%]">{roomName}</div>
-            <div className="mt-2 text-[20px] leading-[120%] text-muted">
+        {/* Header: left text + right tag, align bottom */}
+        <div className="mt-6 flex items-end justify-between gap-6">
+          <div className="min-w-0">
+            {/* Heading 24 */}
+            <div className="text-[20px] sm:text-[24px] font-semibold leading-[120%] tracking-[-0.02em] text-text">
+              {roomName}
+            </div>
+
+            {/* Subheading 20 */}
+            <div className="mt-2 text-[16px] sm:text-[20px] leading-[120%] text-muted">
               ห้อง {roomNo} | {factoryName}
             </div>
           </div>
 
-          <Badge className={st.cls}>{st.label}</Badge>
+          {/* Tag Status: h32, px12, font16 line-height 100% */}
+          <RoomBadge className={st.cls}>{st.label}</RoomBadge>
         </div>
 
-        <div className="mt-8 flex flex-col lg:flex-row gap-6">
-          {/* Current status */}
-          <Card className="shadow-none w-full lg:w-[544px]">
-            <div className="flex items-center gap-3 text-[24px] font-semibold leading-[120%]">
-              <span aria-hidden>〰</span>
-              <span>สถานะปัจจุบัน</span>
+        {/* Cards */}
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Current status (Frame 43) */}
+          <RoomCard variant="rounded24" className="w-full">
+            {/* Title row (Frame 47) */}
+            <div className="flex items-center gap-2">
+              <span className="text-text">
+                <ActivityIcon />
+              </span>
+              <div className="text-[20px] sm:text-[24px] font-semibold leading-[120%] tracking-[-0.02em] text-text">
+                สถานะปัจจุบัน
+              </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-y-6">
-              <div>
-                <div className="text-[20px] leading-[120%] text-muted">สถานะ</div>
-                <div className="mt-2 text-[24px] font-semibold leading-[120%] text-greenInk">กำลังทำงาน</div>
-              </div>
-              <div>
-                <div className="text-[20px] leading-[120%] text-muted">สถานะแจ้งเตือน</div>
-                <div className="mt-2 text-[24px] font-semibold leading-[120%]">ปกติ</div>
-              </div>
-              <div>
-                <div className="text-[20px] leading-[120%] text-muted">ชั่วโมงที่</div>
-                <div className="mt-2 text-[24px] font-semibold leading-[120%] text-blue">7</div>
-              </div>
-              <div>
-                <div className="text-[20px] leading-[120%] text-muted">อุณหภูมิเป้าหมาย</div>
-                <div className="mt-2 text-[24px] font-semibold leading-[120%] text-orange">95.0°C</div>
-              </div>
+            {/* Content blocks */}
+            <div className="mt-6 grid grid-cols-2 gap-x-6 sm:gap-x-8 gap-y-6">
+              <InfoPair label="สถานะ" value="กำลังทำงาน" valueClassName="text-greenInk" />
+              <InfoPair label="สถานะแจ้งเตือน" value="ปกติ" />
+
+              <InfoPair label="ชั่วโมงที่" value="7" valueClassName="text-blue" />
+              <InfoPair label="อุณหภูมิเป้าหมาย" value="95.0°C" valueClassName="text-orange" />
+
               <div className="col-span-2">
-                <div className="text-[20px] leading-[120%] text-muted">คาดว่าเสร็จ</div>
-                <div className="mt-2 text-[24px] font-semibold leading-[120%]">12/03/2569 16.00 น.</div>
+                <InfoPair label="คาดว่าเสร็จ" value="12/03/2569 16.00 น." />
               </div>
             </div>
-          </Card>
+          </RoomCard>
 
-          {/* Latest (Realtime) */}
-          <Card className="shadow-none w-full lg:w-[544px]">
-            <div className="text-[24px] font-semibold leading-[120%]">ค่าสุด (Realtime)</div>
+          {/* Latest (Realtime) (Frame 44) */}
+          <RoomCard variant="rounded24" className="w-full">
+            <div className="text-[20px] sm:text-[24px] font-semibold leading-[120%] tracking-[-0.02em] text-text">
+              ค่าล่าสุด (Realtime)
+            </div>
 
-            <div className="mt-6 space-y-6">
-              <div className="flex items-center gap-4">
+            {/* Frame 28: gap 16 */}
+            <div className="mt-6 flex flex-col gap-4">
+              {/* temp */}
+              <div className="flex items-center gap-6">
                 <CircleIconWrap kind="temp">
-                  <ThermometerIcon />
+                  <RoomMetricSvg kind="temp" />
                 </CircleIconWrap>
-                <div>
-                  <div className="text-[20px] leading-[120%] text-muted">อุณหภูมิ</div>
-                  <div className="mt-2 text-[32px] font-semibold leading-[120%] text-orange">93.6°C</div>
+                <div className="min-w-0">
+                  <div className="text-[16px] leading-[140%] text-muted">อุณหภูมิ</div>
+                  {/* Figma value 28 */}
+                  <div className="mt-2 text-[20px] sm:text-[28px] font-semibold leading-[120%] text-orange">
+                    93.6°C
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
+              {/* hum */}
+              <div className="flex items-center gap-6">
                 <CircleIconWrap kind="hum">
-                  <DropIcon />
+                  <RoomMetricSvg kind="hum" />
                 </CircleIconWrap>
-                <div>
-                  <div className="text-[20px] leading-[120%] text-muted">ความชื้นสัมพัทธ์</div>
-                  <div className="mt-2 text-[32px] font-semibold leading-[120%] text-blue">93.6%</div>
+                <div className="min-w-0">
+                  <div className="text-[16px] leading-[140%] text-muted">ความชื้นสัมพัทธ์</div>
+                  <div className="mt-2 text-[20px] sm:text-[28px] font-semibold leading-[120%] text-blue">
+                    93.6%
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
+              {/* furnace */}
+              <div className="flex items-center gap-6">
                 <CircleIconWrap kind="furnance">
-                  <FlameIcon />
+                  <RoomMetricSvg kind="furnance" active={furnanceOn} />
                 </CircleIconWrap>
-                <div>
-                  <div className="text-[20px] leading-[120%] text-muted">สถานะเตาอบ</div>
-                  <div className="mt-2 text-[32px] font-semibold leading-[120%] text-greenInk">เปิด</div>
+                <div className="min-w-0">
+                  <div className="text-[16px] leading-[140%] text-muted">สถานะเตาอบ</div>
+                  <div className={cn(
+                    "mt-2 text-[20px] sm:text-[28px] font-semibold leading-[120%]",
+                    furnanceOn ? "text-greenInk" : "text-muted"
+                  )}>
+                    {furnanceOn ? "เปิด" : "ปิด"}
+                  </div>
                 </div>
               </div>
 
-              <div className="h-px w-full bg-border" />
+              <div className="h-px w-full bg-border my-1" />
 
-              <div className="text-[20px] leading-[120%] text-muted flex items-center gap-2">
-                <span aria-hidden>⏱</span>
+              {/* Frame 24 */}
+              <div className="flex items-center gap-2 text-[16px] leading-[140%] text-muted">
+                <span className="text-muted">
+                  <ClockIcon />
+                </span>
                 <span>อัปเดตล่าสุด 1 นาที</span>
               </div>
             </div>
-          </Card>
+          </RoomCard>
         </div>
 
-        {/* History */}
-        <div className="mt-8 text-[24px] font-semibold leading-[120%]">ประวัติรายการห้องอบ A1</div>
+        {/* History title*/}
+        <div className="mt-8 text-[20px] sm:text-[24px] font-semibold leading-[120%] tracking-[-0.02em] text-text">
+          ประวัติรายการห้องอบ A1
+        </div>
 
-        <Card className="shadow-none mt-4 p-0 overflow-hidden">
-          <div className="grid grid-cols-3 bg-surface px-6 py-4 border-b border-border">
-            <div className="text-[20px] leading-[120%] text-muted">เวลาเริ่ม</div>
-            <div className="text-[20px] leading-[120%] text-muted">เวลาจบ</div>
-            <div className="text-[20px] leading-[120%] text-muted text-center">ระยะเวลาการอบ</div>
+        {/* History table */}
+        <RoomCard variant="table" className="mt-4 p-0 overflow-hidden">
+          {/* Header row */}
+          <div className={cn("grid", HISTORY_COLS, "bg-[#F5F5F5] px-4 sm:px-6 py-4 border-b border-border gap-3 sm:gap-6")}>
+            <div className="text-[16px] sm:text-[20px] leading-[120%] text-muted">เวลาเริ่ม</div>
+            <div className="text-[16px] sm:text-[20px] leading-[120%] text-muted">เวลาจบ</div>
+            <div className="text-[16px] sm:text-[20px] leading-[120%] text-muted">ระยะเวลาการอบ</div>
           </div>
 
           {[
@@ -190,13 +302,29 @@ export default async function RoomDetailPage({
             { s: "01/02/2026 09.00", e: "03/02/2026 08.59", d: "48 ชั่วโมง" },
             { s: "01/02/2026 09.00", e: "03/02/2026 08.59", d: "48 ชั่วโมง" },
           ].map((row, idx) => (
-            <div key={idx} className="grid grid-cols-3 px-6 py-5 border-b border-border last:border-b-0">
-              <div className="text-[20px] leading-[120%]">{row.s}</div>
-              <div className="text-[20px] leading-[120%]">{row.e}</div>
-              <div className="text-[20px] leading-[120%] text-center">{row.d}</div>
+            <div
+              key={idx}
+              className={cn(
+                "grid items-start",
+                HISTORY_COLS,
+                "px-4 sm:px-6 py-4 border-b border-border last:border-b-0 gap-3 sm:gap-6",
+                "text-[16px] sm:text-[20px] leading-[120%] text-text tabular-nums"
+              )}
+            >
+              <div className="min-w-0">
+                <span className="block sm:inline">{row.s.split(" ")[0]}</span>{" "}
+                <span className="block sm:inline">{row.s.split(" ")[1]}</span>
+              </div>
+
+              <div className="min-w-0">
+                <span className="block sm:inline">{row.e.split(" ")[0]}</span>{" "}
+                <span className="block sm:inline">{row.e.split(" ")[1]}</span>
+              </div>
+
+              <div className="min-w-0 text-center whitespace-nowrap">{row.d}</div>
             </div>
           ))}
-        </Card>
+        </RoomCard>
 
         {/* Hidden debug */}
         <div className="sr-only">roomId: {roomId}</div>
