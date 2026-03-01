@@ -160,7 +160,7 @@ export function RoomCard(room: RoomSummary) {
 
           {/* Row 2: room no + factory name (for long name) */}
           <div className="mt-1 text-base lg:text-[20px] font-normal leading-[130%] text-muted break-words">
-            ห้อง {room.roomNo} | โรงงาน {room.factoryName}
+            {room.roomNo} | {room.factoryName}
           </div>
         </div>
 

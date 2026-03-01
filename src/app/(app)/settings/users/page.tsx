@@ -7,26 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/cn";
 
-import { ensureUsersStore, readUsersStore, writeUsersStore, type UserRow, type Role } from "@/lib/mockUsersStore";
-
-type Role = "ADMIN" | "USER" | "VIEWER";
-
-type UserRow = {
-  id: string;
-  fullName: string;
-  username: string;
-  password: string;
-  email: string;
-  phone: string;
-  lineId: string;
-  role: Role;
-  factories: string[]; // แสดงเป็น "โรงงานเชียงใหม่, โรงงานลำปาง, ..."
-};
-
-type UsersMock = {
-  users: UserRow[];
-  factories: string[];
-};
+import { ensureUsersStore, readUsersStore, writeUsersStore, type UserRow, type Role, type FactoryOption } from "@/lib/mockUsersStore";
 
 type ModalKind = "none" | "create" | "edit" | "confirmSave" | "confirmDelete" | "success";
 
@@ -105,10 +86,11 @@ function MultiSelectDropdown({
   onChange,
 }: {
   labelPlaceholder: string; // เช่น "เลือกโรงงาน"
-  options: string[];
-  value: string[]; // รายการที่เลือก
+  options: FactoryOption[];
+  value: string[]; // factoryIds ที่เลือก
   onChange: (next: string[]) => void;
 }) {
+  const nameById = React.useMemo(() => new Map(options.map((o) => [o.id, o.name] as const)), [options]);
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement | null>(null);
 
@@ -126,12 +108,12 @@ function MultiSelectDropdown({
     value.length === 0
       ? labelPlaceholder
       : value.length <= 2
-      ? value.join(", ")
-      : `${value[0]}, ${value[1]} +${value.length - 2}`;
+      ? value.map((id) => nameById.get(id) ?? id).join(", ")
+      : `${nameById.get(value[0]) ?? value[0]}, ${nameById.get(value[1]) ?? value[1]} +${value.length - 2}`;
 
-  function toggle(opt: string) {
-    const has = value.includes(opt);
-    const next = has ? value.filter((x) => x !== opt) : [...value, opt];
+  function toggle(id: string) {
+    const has = value.includes(id);
+    const next = has ? value.filter((x) => x !== id) : [...value, id];
     onChange(next);
   }
 
@@ -173,7 +155,7 @@ function MultiSelectDropdown({
 
           <div className="max-h-[240px] overflow-y-auto py-2">
             {options.map((opt) => {
-              const checked = value.includes(opt);
+              const checked = value.includes(opt.id);
               return (
                 <label
                   key={opt}
@@ -183,9 +165,9 @@ function MultiSelectDropdown({
                     type="checkbox"
                     className="h-4 w-4"
                     checked={checked}
-                    onChange={() => toggle(opt)}
+                    onChange={() => toggle(opt.id)}
                   />
-                  <span className="text-[16px]">{opt}</span>
+                  <span className="text-[16px]">{opt.name}</span>
                 </label>
               );
             })}
@@ -360,7 +342,17 @@ export default function UsersSettingsPage() {
   const [loading, setLoading] = React.useState(true);
 
   const [users, setUsers] = React.useState<UserRow[]>([]);
-  const [factories, setFactories] = React.useState<string[]>([]);
+  const [factories, setFactories] = React.useState<FactoryOption[]>([]);
+const factoryNameById = React.useMemo(
+  () => new Map(factories.map((f) => [f.id, f.name] as const)),
+  [factories]
+);
+
+function formatFactoryIds(ids: string[]) {
+  if (!ids.length) return "-";
+  return ids.map((id) => factoryNameById.get(id) ?? id).join(", ");
+}
+
 
   const [roleFilter, setRoleFilter] = React.useState<Role | "">("");
   const [modal, setModal] = React.useState<ModalKind>("none");
@@ -419,7 +411,7 @@ export default function UsersSettingsPage() {
     setEmail(u.email ?? "");
     setPhone(u.phone ?? "");
     setLineId(u.lineId ?? "");
-    setFactoryPick(u.factories ?? []);
+    setFactoryPick(u.factoryIds ?? []);
     setRolePick(u.role ?? "USER");
     setFormError(null);
   }
@@ -482,7 +474,7 @@ export default function UsersSettingsPage() {
       phone: phone.trim(),
       lineId: lineId.trim(),
       role: (rolePick as Role) ?? "USER",
-      factories: factoryPick.trim() ? [factoryPick.trim()] : [],
+      factoryIds: factoryPick,
     };
 
     const current = readUsersStore();
@@ -604,7 +596,7 @@ export default function UsersSettingsPage() {
                     <td className="px-6 py-4">
                       <RoleBadge role={u.role} />
                     </td>
-                    <td className="px-6 py-4">{(u.factories ?? []).join(", ")}</td>
+                    <td className="px-6 py-4">{formatFactoryIds(u.factoryIds ?? [])}</td>
 
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-3">

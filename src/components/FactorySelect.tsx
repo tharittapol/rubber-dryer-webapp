@@ -32,11 +32,14 @@ export function FactorySelect({ factories }: { factories: string[] }) {
       >
         <option value="all">ทุกโรงงาน</option>
 
-        {factories.map((f) => (
-          <option key={f} value={f}>
-            โรงงาน{f}
-          </option>
-        ))}
+        {factories.map((f) => {
+          const label = f.startsWith("โรงงาน") ? f : `โรงงาน${f}`;
+          return (
+            <option key={f} value={f}>
+              {label}
+            </option>
+          );
+        })}
       </select>
 
       <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">

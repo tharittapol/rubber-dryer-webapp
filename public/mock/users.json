@@ -1,6 +1,5 @@
 {
-  "seedVersion": "2026-02-27-01",
-  "factories": ["โรงงานเชียงใหม่", "โรงงานลำปาง", "โรงงานยะลา"],
+  "seedVersion": "2026-03-01-02",
   "users": [
     {
       "id": "u-1",
@@ -11,7 +10,10 @@
       "phone": "0812364498",
       "lineId": "KOJBL",
       "role": "ADMIN",
-      "factories": ["โรงงานเชียงใหม่", "โรงงานลำปาง", "โรงงานยะลา"]
+      "factoryIds": [
+        "fac-cnx-001",
+        "fac-lpg-001"
+      ]
     },
     {
       "id": "u-2",
@@ -22,7 +24,10 @@
       "phone": "0813659852",
       "lineId": "SKNHIL123",
       "role": "USER",
-      "factories": ["โรงงานเชียงใหม่", "โรงงานลำปาง", "โรงงานยะลา"]
+      "factoryIds": [
+        "fac-cnx-001",
+        "fac-lpg-001"
+      ]
     },
     {
       "id": "u-3",
@@ -33,7 +38,10 @@
       "phone": "0615698956",
       "lineId": "SHoikp369",
       "role": "VIEWER",
-      "factories": ["โรงงานเชียงใหม่", "โรงงานลำปาง", "โรงงานยะลา"]
+      "factoryIds": [
+        "fac-cnx-001",
+        "fac-lpg-001"
+      ]
     }
   ]
 }

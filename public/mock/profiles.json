@@ -1,0 +1,25 @@
+{
+  "profiles": [
+    {
+      "profileId": "p-std-48",
+      "profileName": "โปรไฟล์มาตรฐาน 48 ชม.",
+      "totalHours": 48,
+      "maxTempC": 60,
+      "description": "เหมาะสำหรับอบยางทั่วไป"
+    },
+    {
+      "profileId": "p-fast-24",
+      "profileName": "โปรไฟล์เร่งด่วน 24 ชม.",
+      "totalHours": 24,
+      "maxTempC": 60,
+      "description": "ต้องการความเร็วสูงขึ้น"
+    },
+    {
+      "profileId": "p-soft-60",
+      "profileName": "โปรไฟล์นุ่มนวล 60 ชม.",
+      "totalHours": 60,
+      "maxTempC": 60,
+      "description": "ลดความเสี่ยงอุณหภูมิแกว่ง"
+    }
+  ]
+}

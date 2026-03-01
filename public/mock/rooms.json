@@ -1,11 +1,10 @@
 {
-  "factories": ["โรงงานเชียงใหม่", "โรงงานลำปาง"],
   "rooms": [
     {
       "id": "room-a1",
       "roomName": "ห้องอบ A1",
       "roomNo": "001",
-      "factoryName": "โรงงานเชียงใหม่",
+      "factoryId": "fac-cnx-001",
       "plcIp": "192.168.1.10",
       "gatewayId": "GW-001"
     },
@@ -13,7 +12,7 @@
       "id": "room-a2",
       "roomName": "ห้องอบ A2",
       "roomNo": "002",
-      "factoryName": "โรงงานเชียงใหม่",
+      "factoryId": "fac-cnx-001",
       "plcIp": "192.168.1.10",
       "gatewayId": "GW-002"
     },
@@ -21,32 +20,32 @@
       "id": "room-a3",
       "roomName": "ห้องอบ A3",
       "roomNo": "003",
-      "factoryName": "โรงงานเชียงใหม่",
+      "factoryId": "fac-cnx-001",
       "plcIp": "192.168.1.10",
       "gatewayId": "GW-003"
     },
     {
       "id": "room-b1",
       "roomName": "ห้องอบ B1",
-      "roomNo": "007",
-      "factoryName": "โรงงานลำปาง",
-      "plcIp": "192.168.1.10",
+      "roomNo": "005",
+      "factoryId": "fac-lpg-001",
+      "plcIp": "192.168.2.10",
       "gatewayId": "GW-004"
     },
     {
       "id": "room-b2",
       "roomName": "ห้องอบ B2",
       "roomNo": "006",
-      "factoryName": "โรงงานลำปาง",
-      "plcIp": "192.168.1.10",
+      "factoryId": "fac-lpg-001",
+      "plcIp": "192.168.2.10",
       "gatewayId": "GW-005"
     },
     {
       "id": "room-b3",
       "roomName": "ห้องอบ B3",
-      "roomNo": "005",
-      "factoryName": "โรงงานลำปาง",
-      "plcIp": "192.168.1.10",
+      "roomNo": "007",
+      "factoryId": "fac-lpg-001",
+      "plcIp": "192.168.2.10",
       "gatewayId": "GW-006"
     }
   ]

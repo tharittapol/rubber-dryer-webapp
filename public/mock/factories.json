@@ -1,28 +1,28 @@
 {
   "factories": [
     {
-      "id": "fac-chiangmai-1",
+      "id": "fac-cnx-001",
       "name": "โรงงานเชียงใหม่",
       "addressLine": "123 หมู่ 4",
       "province": "เชียงใหม่",
       "district": "เมือง",
       "subdistrict": "ช้างเผือก",
       "postcode": "50300",
-      "roomsCount": 8,
-      "note": "Text Emphasis",
-      "updatedAt": "2024-05-20T10:00:00.000Z"
+      "roomsCount": 3,
+      "note": "โรงงานหลัก (ตัวอย่าง)",
+      "updatedAt": "2026-03-01T00:00:00.000Z"
     },
     {
-      "id": "fac-chiangmai-2",
-      "name": "โรงงานเชียงใหม่",
-      "addressLine": "123 หมู่ 4",
-      "province": "เชียงใหม่",
+      "id": "fac-lpg-001",
+      "name": "โรงงานลำปาง",
+      "addressLine": "88 หมู่ 2",
+      "province": "ลำปาง",
       "district": "เมือง",
-      "subdistrict": "ช้างเผือก",
-      "postcode": "50300",
-      "roomsCount": 8,
-      "note": "Text Emphasis",
-      "updatedAt": "2024-05-20T10:00:00.000Z"
+      "subdistrict": "เวียงเหนือ",
+      "postcode": "52000",
+      "roomsCount": 3,
+      "note": "โรงงานรอง (ตัวอย่าง)",
+      "updatedAt": "2026-03-01T00:00:00.000Z"
     }
   ]
 }

@@ -1,9 +1,13 @@
-import * as React from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import { notFound } from "next/navigation";
+import { getRoomDetailData } from "@/lib/mockRepo.server";
 import type { RoomState } from "@/types/room";
+
+type Params = { roomId: string };
 
 function RoomMetricSvg({ kind, active }: { kind: "temp" | "hum" | "furnance"; active?: boolean }) {
   const src =
@@ -25,7 +29,7 @@ function RoomMetricSvg({ kind, active }: { kind: "temp" | "hum" | "furnance"; ac
   );
 }
 
-function RoomBadge({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) {
+function RoomBadge({ className, ...props }: HTMLAttributes<HTMLSpanElement>) {
   return (
     <Badge
       className={cn(
@@ -42,7 +46,7 @@ function RoomCard({
   variant = "default",
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement> & { variant?: "default" | "rounded24" | "table" }) {
+}: HTMLAttributes<HTMLSpanElement> & { variant?: "default" | "rounded24" | "table" }) {
   const v =
     variant === "rounded24"
       ? "rounded-3xl" // 24px
@@ -84,7 +88,7 @@ function CircleIconWrap({
 }: {
   kind: "temp" | "hum" | "furnance";
   active?: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const cls =
     kind === "temp"
@@ -129,7 +133,7 @@ function InfoPair({
   valueClassName = "",
 }: {
   label: string;
-  value: React.ReactNode;
+  value: ReactNode;
   valueClassName?: string;
 }) {
   return (
@@ -145,17 +149,28 @@ function InfoPair({
   );
 }
 
-type Params = { roomId: string };
-
 export default async function RoomDetailPage({ params }: { params: Promise<Params> }) {
   const { roomId } = await params;
 
-  // mock
-  const roomName = "ห้องอบ A1";
-  const roomNo = "01";
-  const factoryName = "โรงงาน A";
-  const state: RoomState = "RUNNING";
-  const furnanceOn = true;
+  const room = await getRoomDetailData(roomId);
+  if (!room) notFound();
+
+  const roomName = room.roomName;
+  const roomNo = room.roomNo;
+  const factoryName = room.factoryName;
+  const state: RoomState = room.state;
+
+  // realtime
+  const tempC = room.tempC;
+  const humRH = room.humRH;
+  const furnanceOn = room.furnanceOn;
+  const lastUpdateText = room.lastUpdateText;
+
+  const stateText = stateStyle[state].label;
+  const hourNow = room.hourNow ?? "-";
+  const hourTotal = room.hourTotal ?? "-";
+  const etaText = room.etaText ?? "-";
+  const alarmText = room.alarmText ?? "ปกติ";
 
   const st = stateStyle[state];
 
@@ -207,25 +222,24 @@ export default async function RoomDetailPage({ params }: { params: Promise<Param
 
             {/* Content blocks */}
             <div className="mt-6 grid grid-cols-2 gap-x-6 sm:gap-x-8 gap-y-6">
-              <InfoPair label="สถานะ" value="กำลังทำงาน" valueClassName="text-greenInk" />
-              <InfoPair label="สถานะแจ้งเตือน" value="ปกติ" />
+              <InfoPair label="สถานะ" value={stateText} valueClassName={state === "RUNNING" ? "text-greenInk" : ""} />
+              <InfoPair label="สถานะแจ้งเตือน" value={alarmText} valueClassName={state === "FAULT" ? "text-red" : ""} />
 
-              <InfoPair label="ชั่วโมงที่" value="7" valueClassName="text-blue" />
-              <InfoPair label="อุณหภูมิเป้าหมาย" value="95.0°C" valueClassName="text-orange" />
+              <InfoPair label="ชั่วโมงที่" value={hourNow === "-" ? "-" : `${hourNow}/${hourTotal}`} valueClassName="text-blue" />
+              <InfoPair label="อุณหภูมิเป้าหมาย" value="60.0°C" valueClassName="text-orange" />
 
               <div className="col-span-2">
-                <InfoPair label="คาดว่าเสร็จ" value="12/03/2569 16.00 น." />
+                <InfoPair label="คาดว่าเสร็จ" value={etaText} />
               </div>
             </div>
           </RoomCard>
 
-          {/* Latest (Realtime) (Frame 44) */}
+          {/* Latest (Realtime) */}
           <RoomCard variant="rounded24" className="w-full">
             <div className="text-[20px] sm:text-[24px] font-semibold leading-[120%] tracking-[-0.02em] text-text">
               ค่าล่าสุด (Realtime)
             </div>
 
-            {/* Frame 28: gap 16 */}
             <div className="mt-6 flex flex-col gap-4">
               {/* temp */}
               <div className="flex items-center gap-6">
@@ -234,9 +248,8 @@ export default async function RoomDetailPage({ params }: { params: Promise<Param
                 </CircleIconWrap>
                 <div className="min-w-0">
                   <div className="text-[16px] leading-[140%] text-muted">อุณหภูมิ</div>
-                  {/* Figma value 28 */}
                   <div className="mt-2 text-[20px] sm:text-[28px] font-semibold leading-[120%] text-orange">
-                    93.6°C
+                    {tempC.toFixed(1)}°C
                   </div>
                 </div>
               </div>
@@ -249,7 +262,7 @@ export default async function RoomDetailPage({ params }: { params: Promise<Param
                 <div className="min-w-0">
                   <div className="text-[16px] leading-[140%] text-muted">ความชื้นสัมพัทธ์</div>
                   <div className="mt-2 text-[20px] sm:text-[28px] font-semibold leading-[120%] text-blue">
-                    93.6%
+                    {humRH.toFixed(1)}%
                   </div>
                 </div>
               </div>
@@ -272,12 +285,11 @@ export default async function RoomDetailPage({ params }: { params: Promise<Param
 
               <div className="h-px w-full bg-border my-1" />
 
-              {/* Frame 24 */}
               <div className="flex items-center gap-2 text-[16px] leading-[140%] text-muted">
                 <span className="text-muted">
                   <ClockIcon />
                 </span>
-                <span>อัปเดตล่าสุด 1 นาที</span>
+                <span>อัปเดตล่าสุด {lastUpdateText}</span>
               </div>
             </div>
           </RoomCard>

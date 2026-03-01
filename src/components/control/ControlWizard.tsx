@@ -1136,19 +1136,76 @@ export function ControlWizard() {
 
   React.useEffect(() => {
     let alive = true;
-    fetch("/mock/control.json")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((json) => {
+
+    (async () => {
+      try {
+        const [facRes, roomsRes, ctlRes, profRes] = await Promise.all([
+          fetch("/mock/factories.json", { cache: "no-store" }),
+          fetch("/mock/rooms.json", { cache: "no-store" }),
+          fetch("/mock/control.json", { cache: "no-store" }),
+          fetch("/mock/profiles.json", { cache: "no-store" }),
+        ]);
+
+        if (!facRes.ok) throw new Error(`factories: HTTP ${facRes.status}`);
+        if (!roomsRes.ok) throw new Error(`rooms: HTTP ${roomsRes.status}`);
+        if (!ctlRes.ok) throw new Error(`control: HTTP ${ctlRes.status}`);
+        if (!profRes.ok) throw new Error(`profiles: HTTP ${profRes.status}`);
+
+        const facJson = (await facRes.json()) as { factories?: Array<{ id: string; name: string }> };
+        const roomsJson = (await roomsRes.json()) as {
+          rooms?: Array<{ id: string; roomName: string; roomNo: string; factoryId: string }>;
+        };
+        const ctlJson = (await ctlRes.json()) as {
+          roomControls?: Record<
+            string,
+            { state: any; tempC: number; humRH: number; furnanceOn: boolean; lastUpdateText: string }
+          >;
+        };
+        const profJson = (await profRes.json()) as {
+          profiles?: Array<{ profileId: string; profileName: string; totalHours: number; description?: string }>;
+        };
+
         if (!alive) return;
-        setData(json as ControlMockData);
-      })
-      .catch((e) => {
+
+        const factories = (facJson.factories ?? []).map((f) => ({
+          factoryId: f.id,
+          factoryName: f.name,
+        }));
+
+        const factoryNameById = new Map(factories.map((f) => [f.factoryId, f.factoryName] as const));
+        const roomControls = ctlJson.roomControls ?? {};
+
+        const rooms = (roomsJson.rooms ?? []).map((r) => {
+          const c = roomControls[r.id];
+          return {
+            roomId: r.id,
+            roomName: r.roomName,
+            roomNo: r.roomNo,
+            factoryId: r.factoryId,
+            factoryName: factoryNameById.get(r.factoryId) ?? "-",
+            state: c?.state ?? "STOPPED",
+            tempC: c?.tempC ?? null,
+            humRH: c?.humRH ?? null,
+            furnanceOn: c?.furnanceOn ?? null,
+            lastUpdateText: c?.lastUpdateText ?? "-",
+          };
+        });
+
+        const profiles = (profJson.profiles ?? []).map((p) => ({
+          profileId: p.profileId,
+          profileName: p.profileName,
+          totalHours: p.totalHours,
+          description: p.description,
+        }));
+
+        setData({ factories, rooms, profiles } as ControlMockData);
+      } catch (err) {
+        console.error(err);
         if (!alive) return;
-        setLoadError(String(e?.message ?? e));
-      });
+        setData({ factories: [], rooms: [], profiles: [] } as ControlMockData);
+      }
+    })();
+
     return () => {
       alive = false;
     };

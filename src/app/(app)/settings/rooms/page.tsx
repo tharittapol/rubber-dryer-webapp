@@ -7,19 +7,24 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/cn";
 
+type FactoryOption = { id: string; name: string };
+
 type RoomConfig = {
   id: string;
   roomName: string;
   roomNo: string;
+  factoryId: string;
+  // derived for UI display only
   factoryName: string;
   plcIp: string;
   gatewayId: string;
 };
 
 type RoomsMock = {
-  rooms: RoomConfig[];
-  factories: string[];
+  rooms: Array<Omit<RoomConfig, "factoryName">>;
 };
+
+type FactoriesMock = { factories: FactoryOption[] };
 
 type ModalKind = "none" | "create" | "edit" | "confirmSave" | "success" | "confirmDelete";
 
@@ -295,7 +300,7 @@ function isValidIPv4(ip: string) {
 export default function RoomsSettingsPage() {
   const [loading, setLoading] = React.useState(true);
   const [rooms, setRooms] = React.useState<RoomConfig[]>([]);
-  const [factories, setFactories] = React.useState<string[]>([]);
+  const [factories, setFactories] = React.useState<FactoryOption[]>([]);
 
   const [factoryFilter, setFactoryFilter] = React.useState<string>("");
   const [modal, setModal] = React.useState<ModalKind>("none");
@@ -318,11 +323,23 @@ export default function RoomsSettingsPage() {
     let mounted = true;
     (async () => {
       try {
-        const res = await fetch("/mock/rooms.json", { cache: "no-store" });
-        const json = (await res.json()) as RoomsMock;
+        const [roomsRes, facRes] = await Promise.all([
+          fetch("/mock/rooms.json", { cache: "no-store" }),
+          fetch("/mock/factories.json", { cache: "no-store" }),
+        ]);
+        const roomsJson = (await roomsRes.json()) as RoomsMock;
+        const facJson = (await facRes.json()) as FactoriesMock;
+
         if (!mounted) return;
-        setRooms(json.rooms ?? []);
-        setFactories(json.factories ?? []);
+
+        const facById = new Map((facJson.factories ?? []).map((f) => [f.id, f.name] as const));
+        const mergedRooms: RoomConfig[] = (roomsJson.rooms ?? []).map((r) => ({
+          ...r,
+          factoryName: facById.get(r.factoryId) ?? "-",
+        }));
+
+        setRooms(mergedRooms);
+        setFactories(facJson.factories ?? []);
       } catch {
         if (!mounted) return;
         setRooms([]);
@@ -399,8 +416,11 @@ export default function RoomsSettingsPage() {
     const now = Date.now();
     const id = activeId ?? `room-${now}`;
 
+    const factoryId = factories.find((f) => f.name === factoryName.trim())?.id ?? "";
+
     const payload: RoomConfig = {
       id,
+      factoryId,
       factoryName: factoryName.trim(),
       roomName: roomName.trim(),
       roomNo: roomNo.trim(),
@@ -440,7 +460,7 @@ export default function RoomsSettingsPage() {
           <div className="min-w-[240px]">
             <FieldLabel>โรงงาน</FieldLabel>
             <div className="mt-2">
-              <Select value={factoryFilter} onChange={setFactoryFilter} options={factories} placeholder="ทุกโรงงาน" />
+              <Select value={factoryFilter} onChange={setFactoryFilter} options={factories.map((f) => f.name)} placeholder="ทุกโรงงาน" />
             </div>
           </div>
 
@@ -529,7 +549,7 @@ export default function RoomsSettingsPage() {
             <div>
               <FieldLabel>โรงงาน</FieldLabel>
               <div className="mt-2">
-                <Select value={factoryName} onChange={setFactoryName} options={factories} placeholder={modal === "create" ? "เลือกโรงงาน" : undefined} />
+                <Select value={factoryName} onChange={setFactoryName} options={factories.map((f) => f.name)} placeholder={modal === "create" ? "เลือกโรงงาน" : undefined} />
               </div>
             </div>
 

@@ -9,13 +9,17 @@ export type UserRow = {
   phone: string;
   lineId: string;
   role: Role;
-  factories: string[];
+  factoryIds: string[];
 };
 
-type UsersMock = {
+export type FactoryOption = { id: string; name: string };
+
+export type UsersMock = {
   users: UserRow[];
-  factories: string[];
+  factories: FactoryOption[];
 };
+
+type UsersSeed = { seedVersion?: string; users: UserRow[] };
 
 const LS_KEY = "rd_mock_users_v1";
 
@@ -36,24 +40,33 @@ function safeParse<T>(raw: string | null): T | null {
 export async function ensureUsersStore(): Promise<UsersMock> {
   if (typeof window === "undefined") return { users: [], factories: [] };
 
-  const res = await fetch("/mock/users.json", { cache: "no-store" });
-  const seed = (await res.json()) as (UsersMock & { seedVersion?: string });
+  const [usersRes, facRes] = await Promise.all([
+    fetch("/mock/users.json", { cache: "no-store" }),
+    fetch("/mock/factories.json", { cache: "no-store" }),
+  ]);
+
+  const seed = (await usersRes.json()) as UsersSeed;
+  const facJson = (await facRes.json()) as { factories?: Array<{ id: string; name: string }> };
 
   const seedVersion = seed.seedVersion ?? "v0";
+
+  const factories: FactoryOption[] = (facJson.factories ?? []).map((f) => ({ id: f.id, name: f.name }));
+  const users: UserRow[] = seed.users ?? [];
 
   const cached = safeParse<(UsersMock & { seedVersion?: string })>(localStorage.getItem(LS_KEY));
 
   if (!cached?.users || !cached?.factories || (cached.seedVersion ?? "v0") !== seedVersion) {
     const next: UsersMock & { seedVersion?: string } = {
       seedVersion,
-      factories: seed.factories ?? [],
-      users: seed.users ?? [],
+      factories,
+      users,
     };
     localStorage.setItem(LS_KEY, JSON.stringify(next));
     return next;
   }
 
-  return cached;
+  // Always refresh factories from factories.json (single source of truth)
+  return { ...cached, factories };
 }
 
 export function readUsersStore(): UsersMock {
