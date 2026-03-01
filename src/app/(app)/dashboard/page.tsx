@@ -27,7 +27,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       <div className="w-full">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
           <div className="min-w-0">
-            <div className="rd-page-32">แดชบอร์ด</div>
+            <div className="rd-page-32">แผงข้อมูล</div>
             <div className="mt-2 rd-body20 text-muted">ติดตามสถานะห้องอบทั้งหมด</div>
           </div>
 

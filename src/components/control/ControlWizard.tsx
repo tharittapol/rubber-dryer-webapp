@@ -6,8 +6,35 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import type { RoomState } from "@/types/room";
 import type { ControlActionId, ControlMockData, ControlProfile, ControlRoom } from "./types";
+import { Badge } from "@/components/ui/Badge";
 
 type StepId = 1 | 2 | 3;
+
+const ROOM_STATES: RoomState[] = ["RUNNING", "WARM_HOLD", "READY", "WAITING", "STOPPED", "FAULT"];
+function coerceRoomState(v: any): RoomState {
+  return ROOM_STATES.includes(v) ? v : "STOPPED";
+}
+
+const stateTagCls: Record<RoomState, string> = {
+  READY: "bg-[rgba(43,127,255,0.2)] text-[#2B7FFF] border-[#2B7FFF]",
+  RUNNING: "bg-[rgba(20,174,92,0.2)] text-[#009951] border-[#14AE5C]",
+  WARM_HOLD: "bg-[rgba(255,105,0,0.2)] text-[#FF6900] border-[#FF6900]",
+  WAITING: "bg-[rgba(232,185,49,0.2)] text-[#BF6A02] border-[#975102]",
+  STOPPED: "bg-[#F5F5F5] text-[#2C2C2C] border-[#767676]",
+  FAULT: "bg-[rgba(192,15,12,0.2)] text-[#EC221F] border-[#EC221F]",
+};
+
+function ControlBadge({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) {
+  return (
+    <Badge
+      className={cn(
+        "h-8 px-3 py-2 text-[16px] leading-[100%] rounded-full inline-flex items-center justify-center gap-2 whitespace-nowrap",
+        className
+      )}
+      {...props}
+    />
+  );
+}
 
 function stateLabel(st: RoomState) {
   switch (st) {
@@ -29,7 +56,7 @@ function stateLabel(st: RoomState) {
 }
 
 function canStart(st: RoomState) {
-  return st === "READY" || st === "STOPPED";
+  return st === "READY";
 }
 function canStop(st: RoomState) {
   return st === "RUNNING" || st === "WARM_HOLD" || st === "WAITING";
@@ -470,7 +497,7 @@ function ConfirmResetModal({
           title: "ยืนยันการรีเซ็ตห้องอบ",
           desc: "คุณกำลังจะทำการรีเซ็ตเพื่อเตรียมความพร้อมสำหรับการอบรอบใหม่",
           badgeTone: "border-[color:rgba(0,0,0,0.18)] bg-bg text-[color:#1F1F1F]",
-          badgeText: `ห้อง ${roomName} ${factoryName}\nสถานะปัจจุบัน: หยุดทำงาน`,
+          badgeText: `${roomName} ${factoryName}\nสถานะปัจจุบัน: หยุดทำงาน`,
           hint: "",
           primaryText: "ยืนยันรีเซ็ตระบบ",
         };
@@ -747,43 +774,49 @@ function WheelColumn<T extends number>({
 
 /** ====== Stepper ====== */
 function Stepper({ step, totalSteps }: { step: StepId; totalSteps: 2 | 3 }) {
-  const doneCls = "bg-[color:#14AE5C] text-white border-[color:#14AE5C]";
-  const activeCls = "bg-[color:#14AE5C] text-white border-[color:#14AE5C]";
-  const idleCls = "bg-[#E9E9E9] text-[color:#6B6B6B] border-[#E9E9E9]";
-  const lineActive = "bg-[color:#14AE5C]";
-  const lineIdle = "bg-[#D5D5D5]";
+  const DotNum = ({ n, active }: { n: number; active: boolean }) => (
+    <div
+      className={cn(
+        "h-[44px] w-[44px] sm:h-[50px] sm:w-[50px] rounded-full grid place-items-center",
+        active ? "bg-[#14AE5C] text-[#F3F3F3]" : "bg-[#D9D9D9] text-[#757575]"
+      )}
+    >
+      <div className="text-[20px] sm:text-[24px] font-semibold leading-[120%] tracking-[-0.02em]">{n}</div>
+    </div>
+  );
 
-  const Node = ({ n }: { n: 1 | 2 | 3 }) => {
-    const isDone = step > n;
-    const isActive = step === n;
+  const CheckDone = () => (
+    <div
+      className={cn(
+        "h-[44px] w-[44px] sm:h-[50px] sm:w-[50px]",
+        "rounded-[32px] grid place-items-center",
+        "bg-[#14AE5C] border border-[#14AE5C]"
+      )}
+      aria-label="done"
+    >
+      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="#F5F5F5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 6 9 17l-5-5" />
+      </svg>
+    </div>
+  );
 
-    // If totalSteps=2, then step 3 will not exist.
-    const cls = isDone ? doneCls : isActive ? activeCls : idleCls;
+  const Line = ({ active }: { active: boolean }) => (
+    <div className={cn("w-[56px] sm:w-[85px] border-t-[3px]", active ? "border-[#14AE5C]" : "border-[#D9D9D9]")} />
+  );
 
-    return (
-      <div className={cn("h-11 w-11 rounded-full grid place-items-center border text-[16px] font-semibold", cls)}>
-        {isDone ? "✓" : n}
-      </div>
-    );
-  };
-
-  if (totalSteps === 2) {
-    return (
-      <div className="flex items-center justify-center gap-4">
-        <Node n={1} />
-        <div className={cn("h-[3px] w-24 rounded-full", step >= 2 ? lineActive : lineIdle)} />
-        <Node n={2} />
-      </div>
-    );
-  }
+  const show3 = totalSteps === 3;
 
   return (
     <div className="flex items-center justify-center gap-4">
-      <Node n={1} />
-      <div className={cn("h-[3px] w-24 rounded-full", step >= 2 ? lineActive : lineIdle)} />
-      <Node n={2} />
-      <div className={cn("h-[3px] w-24 rounded-full", step >= 3 ? lineActive : lineIdle)} />
-      <Node n={3} />
+      {step >= 2 ? <CheckDone /> : <DotNum n={1} active={step >= 1} />}
+      <Line active={step >= 2} />
+      <DotNum n={2} active={step >= 2} />
+      {show3 ? (
+        <>
+          <Line active={step >= 3} />
+          <DotNum n={3} active={step >= 3} />
+        </>
+      ) : null}
     </div>
   );
 }
@@ -798,75 +831,101 @@ function RoomPickCard({
   selected: boolean;
   onClick: () => void;
 }) {
+  const st = room.state ?? "STOPPED";
+
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "text-left w-full rounded-xl border bg-bg px-6 py-5 transition",
-        selected
-          ? "border-[color:#14AE5C] bg-[color:rgba(20,174,92,0.10)] ring-2 ring-[color:rgba(20,174,92,0.20)]"
-          : "border-border hover:bg-surface"
+        "w-full text-left min-h-[92px] rounded-md border transition-colors",
+        "p-6",
+        selected ? "bg-[#EBFFEE] border-2 border-[#14AE5C]" : "bg-white border-[#D9D9D9]"
       )}
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-center justify-between gap-6">
         <div className="min-w-0">
-          <div className="text-[18px] font-semibold leading-[120%] truncate">{room.roomName}</div>
-          <div className="mt-1 text-[14px] text-muted leading-[140%] truncate">
-            ห้อง {room.roomNo} | โรงงาน {room.factoryName}
+          <div className="rd-body16 text-text">{room.roomName}</div>
+          <div className="rd-body16 text-muted">
+            {room.roomNo} | {room.factoryName}
           </div>
         </div>
 
-        <div
-          className={cn(
-            "shrink-0 text-[13px] rounded-full border px-4 py-1.5 font-semibold",
-            room.state === "READY" && "bg-[color:rgba(43,127,255,0.18)] text-[color:#2B7FFF] border-[color:#2B7FFF]",
-            room.state === "RUNNING" && "bg-[color:rgba(20,174,92,0.18)] text-[color:#0F8A4A] border-[color:#14AE5C]",
-            (room.state === "WAITING" || room.state === "WARM_HOLD") &&
-              "bg-[color:rgba(255,105,0,0.14)] text-[color:#B14B00] border-[color:#FF6900]",
-            room.state === "STOPPED" && "bg-[#F5F5F5] text-[color:#4B4B4B] border-[#CFCFCF]",
-            room.state === "FAULT" && "bg-[color:rgba(224,80,80,0.16)] text-[color:#B22A2A] border-[color:#E05050]"
-          )}
-        >
-          {stateLabel(room.state)}
-        </div>
+        <ControlBadge className={stateTagCls[st]}>{stateLabel(st)}</ControlBadge>
       </div>
-
-      <div className="mt-4 text-[12px] text-muted">อัปเดตล่าสุด {room.lastUpdateText ?? "-"}</div>
     </button>
   );
 }
 
-/** ====== Step2 Action tiles (match screenshot) ====== */
+/** ====== Step2 Action tiles ====== */
+type ActionKind = "START" | "STOP" | "RESET";
+
+function actionSelectedStyle(kind: ActionKind) {
+  if (kind === "START") {
+    return {
+      card: "bg-[#EBFFEE] border-2 border-[#14AE5C]",
+      fg: "text-[#14AE5C]",
+    };
+  }
+  if (kind === "STOP") {
+    return {
+      card: "bg-[#FEE9E7] border-2 border-[#EC221F]",
+      fg: "text-[#EC221F]",
+    };
+  }
+  return {
+    // RESET
+    card: "bg-[#FFF0E6] border-2 border-[#FF6900]",
+    fg: "text-[#FF6900]",
+  };
+}
+
 function ActionTile({
+  kind,
   title,
   icon,
   selected,
   disabled,
   onClick,
 }: {
+  kind: ActionKind;
   title: string;
   icon: React.ReactNode;
   selected: boolean;
   disabled: boolean;
   onClick: () => void;
 }) {
+  const sel = actionSelectedStyle(kind);
+
   return (
     <button
       type="button"
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "w-full rounded-xl border p-6 sm:p-7 transition grid place-items-center text-center",
-        disabled && "opacity-40 cursor-not-allowed",
-        !disabled && "hover:bg-surface",
-        selected ? "border-[color:#14AE5C] bg-[color:rgba(20,174,92,0.12)]" : "border-border bg-bg"
+        "w-full h-[114px] rounded-2xl",
+        "flex flex-col items-center justify-center",
+        "p-6 gap-3 transition-colors",
+        selected ? sel.card : "bg-white border border-[#D9D9D9]",
+        disabled && "opacity-50 cursor-not-allowed"
       )}
     >
-      <div className={cn("h-14 w-14 rounded-full grid place-items-center", selected ? "text-[color:#14AE5C]" : "text-[color:#A8A8A8]")} aria-hidden>
+      <div
+        className={cn(
+          "h-8 w-8",
+          selected ? sel.fg : "text-[#757575]"
+        )}
+        aria-hidden
+      >
         {icon}
       </div>
-      <div className={cn("mt-3 text-[16px] font-semibold", selected ? "text-[color:#14AE5C]" : "text-[color:#9A9A9A]")}>
+
+      <div
+        className={cn(
+          "text-[16px] font-semibold leading-[140%]",
+          selected ? sel.fg : "text-[#757575]"
+        )}
+      >
         {title}
       </div>
     </button>
@@ -875,21 +934,23 @@ function ActionTile({
 
 function IconPlay() {
   return (
-    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="3">
       <path d="M8 5v14l11-7z" fill="currentColor" stroke="none" />
     </svg>
   );
 }
+
 function IconStop() {
   return (
-    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="3">
       <rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor" stroke="none" />
     </svg>
   );
 }
+
 function IconReset() {
   return (
-    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="3">
       <path d="M3 12a9 9 0 0 1 15.5-6.5" />
       <path d="M18.5 5.5V3" />
       <path d="M18.5 5.5H16" />
@@ -1156,10 +1217,7 @@ export function ControlWizard() {
           rooms?: Array<{ id: string; roomName: string; roomNo: string; factoryId: string }>;
         };
         const ctlJson = (await ctlRes.json()) as {
-          roomControls?: Record<
-            string,
-            { state: any; tempC: number; humRH: number; furnanceOn: boolean; lastUpdateText: string }
-          >;
+          roomControls?: Record<string, { state: unknown; tempC: number; humRH: number; furnanceOn: boolean; lastUpdateText: string }>;
         };
         const profJson = (await profRes.json()) as {
           profiles?: Array<{ profileId: string; profileName: string; totalHours: number; description?: string }>;
@@ -1176,14 +1234,16 @@ export function ControlWizard() {
         const roomControls = ctlJson.roomControls ?? {};
 
         const rooms = (roomsJson.rooms ?? []).map((r) => {
-          const c = roomControls[r.id];
+          const c = roomControls[r.id] ?? null;
+          const st = coerceRoomState(c?.state);
+
           return {
             roomId: r.id,
             roomName: r.roomName,
             roomNo: r.roomNo,
             factoryId: r.factoryId,
             factoryName: factoryNameById.get(r.factoryId) ?? "-",
-            state: c?.state ?? "STOPPED",
+            state: st,
             tempC: c?.tempC ?? null,
             humRH: c?.humRH ?? null,
             furnanceOn: c?.furnanceOn ?? null,
@@ -1202,7 +1262,8 @@ export function ControlWizard() {
       } catch (err) {
         console.error(err);
         if (!alive) return;
-        setData({ factories: [], rooms: [], profiles: [] } as ControlMockData);
+        setLoadError(err instanceof Error ? err.message : "โหลดข้อมูลไม่สำเร็จ");
+        setData(null);
       }
     })();
 
@@ -1347,64 +1408,66 @@ export function ControlWizard() {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col gap-6">
-        <div className="relative">
-          <div className={cn(step === 1 ? "mt-6" : "mt-2", "flex justify-center")}>
-            <Stepper step={step} totalSteps={stepperTotal} />
-          </div>
+      <div className="w-full max-w mx-auto flex flex-col items-center gap-8">
+        {/* Heading + Subheading */}
+        <div className="w-full">
+          <div className="rd-heading-24 text-text">ควบคุมห้องอบ</div>
+          <div className="mt-2 rd-subheading-20 text-muted">สั่งงาน เริ่มอบ/หยุดอบ/คืนค่า ห้องอบ</div>
+        </div>
+
+        {/* Stepper */}
+        <div className="w-full flex justify-center">
+          <Stepper step={step} totalSteps={stepperTotal} />
         </div>
 
         {loadError ? (
-          <Card>
+          <Card className="w-full">
             <div className="text-red font-semibold">โหลดข้อมูลไม่สำเร็จ</div>
             <div className="mt-2 text-muted text-[14px]">{loadError}</div>
           </Card>
         ) : !data ? (
-          <Card>
+          <Card className="w-full">
             <div className="text-muted">กำลังโหลดข้อมูล...</div>
           </Card>
         ) : (
           <>
-            {(step === 2 || step === 3) && (
-              <div className="mx-auto w-full max-w-[980px]">
-                <div className="mb-8">
-                  <div className="text-[28px] font-semibold leading-[120%]">{selectedRoom?.roomName ?? "ห้องอบ"}</div>
-                  <div className="mt-2 text-[16px] text-muted">
-                    ห้อง {selectedRoom?.roomNo ?? "-"} | โรงงาน {selectedRoom?.factoryName ?? "-"}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* =================== Step 1 =================== */}
+            {/* ===== Step 1 ===== */}
             {step === 1 && (
-              <div className="mx-auto w-full max-w-[920px] rounded-2xl border border-border bg-surface p-6 sm:p-8">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="text-[24px] font-semibold leading-[120%]">เลือกห้องอบ</div>
-                    <div className="mt-2 text-[16px] text-muted leading-[140%]">เลือกห้องที่ต้องการ เริ่มงาน</div>
-                  </div>
+              <div className="w-full max-w-[1300px] flex flex-col items-end gap-6">
+                {/* Panel */}
+                <div className="w-full rounded-lg border border-[#D9D9D9] bg-[#F5F5F5] p-6">
+                  {/* Header row */}
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+                    <div className="min-w-0">
+                      <div className="rd-heading-24 text-text">เลือกห้องอบ</div>
+                      <div className="mt-2 rd-subheading-20 text-muted">เลือกห้องที่ต้องการควบคุม</div>
+                    </div>
 
-                  <div className="w-full sm:w-[360px]">
-                    <div className="relative">
-                      <select
-                        className="h-12 w-full appearance-none rounded-md border border-border bg-bg px-4 pr-10 rd-sub16 outline-none focus:ring-2 focus:ring-[color:rgba(0,0,0,0.06)]"
-                        value={factoryId}
-                        onChange={(e) => {
-                          setFactoryId(e.target.value);
-                          setSelectedRoomId(null);
-                        }}
-                        aria-label="Factory"
-                      >
-                        <option value="all">ทุกโรงงาน</option>
-                        {data.factories.map((f) => (
-                          <option key={f.factoryId} value={f.factoryId}>
-                            {f.factoryName}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
-                        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                    {/* Select */}
+                    <div className="w-full sm:w-[351px]">
+                      <div className="relative">
+                        <select
+                          className={cn(
+                            "h-10 w-full appearance-none rounded-sm border border-[#D9D9D9] bg-white",
+                            "pl-4 pr-10 rd-sub16 text-text outline-none",
+                            "focus:shadow-ringBlue"
+                          )}
+                          value={factoryId}
+                          onChange={(e) => {
+                            setFactoryId(e.target.value);
+                            setSelectedRoomId(null);
+                          }}
+                          aria-label="Factory"
+                        >
+                          <option value="all">ทุกโรงงาน</option>
+                          {data.factories.map((f) => (
+                            <option key={f.factoryId} value={f.factoryId}>
+                              {f.factoryName}
+                            </option>
+                          ))}
+                        </select>
+                      <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-text">
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6">
                           <path d="M6 9l6 6 6-6" />
                         </svg>
                       </div>
@@ -1412,36 +1475,53 @@ export function ControlWizard() {
                   </div>
                 </div>
 
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  {rooms.map((r) => (
-                    <RoomPickCard key={r.roomId} room={r} selected={r.roomId === selectedRoomId} onClick={() => setSelectedRoomId(r.roomId)} />
-                  ))}
+                {/* Room cards grid */}
+                  <div className="mt-6 grid gap-4 md:grid-cols-2">
+                    {rooms.map((r) => (
+                      <RoomPickCard
+                        key={r.roomId}
+                        room={r}
+                        selected={r.roomId === selectedRoomId}
+                        onClick={() => setSelectedRoomId(r.roomId)}
+                      />
+                    ))}
+                  </div>
                 </div>
 
-                <div className="mt-6 flex items-center justify-end">
-                  <Button
-                    onClick={goNext}
-                    disabled={!selectedRoomId}
-                    className={cn(
-                      "h-12 px-8 rounded-md border",
-                      selectedRoomId ? "border-[color:#14AE5C] bg-[color:#14AE5C] text-white hover:bg-[color:#109A51]" : "border-[#E9E9E9] bg-[#E9E9E9] text-[color:#6B6B6B]"
-                    )}
-                  >
-                    ถัดไป <span aria-hidden className="ml-2">›</span>
-                  </Button>
-                </div>
+                {/* Next button */}
+                <Button
+                  onClick={goNext}
+                  disabled={!selectedRoomId}
+                  size="figma40"
+                  className={cn(
+                    "w-[120px] rounded-sm border",
+                    selectedRoomId
+                      ? "bg-green border-[#009951] text-greenBg hover:bg-[color:#109A51]"
+                      : "bg-[#D9D9D9] border-[#D9D9D9] text-[#757575]"
+                  )}
+                >
+                  ถัดไป
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                    <path d="M10 6l6 6-6 6" />
+                  </svg>
+                </Button>
               </div>
             )}
 
             {/* =================== Step 2 =================== */}
             {step === 2 && (
-              <div className="mx-auto w-full max-w-[980px]">
-                <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
-                  <div className="text-[22px] font-semibold">เลือก Action</div>
-                  <div className="mt-1 text-[16px] text-muted">เลือกการดำเนินการที่ต้องการ</div>
+              <div className="w-full max-w-[1300px] flex flex-col items-end gap-6">
+                {/* Panel */}
+                <div className="w-full rounded-3xl border border-[#D9D9D9] bg-[#F5F5F5] p-6">
+                  <div className="min-w-0">
+                    <div className="rd-heading-24 text-text">เลือก Action</div>
+                    <div className="mt-2 rd-subheading-20 text-muted">เลือกการดำเนินการที่ต้องการ</div>
+                  </div>
 
-                  <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                  {/* Action bar */}
+                  <div className="mt-6 w-full max-w-[837px] mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6">
                     <ActionTile
+                      kind="START"
                       title="เริ่มอบ"
                       icon={<IconPlay />}
                       selected={selectedAction === "START"}
@@ -1449,6 +1529,7 @@ export function ControlWizard() {
                       onClick={() => setSelectedAction("START")}
                     />
                     <ActionTile
+                      kind="STOP"
                       title="หยุดอบ"
                       icon={<IconStop />}
                       selected={selectedAction === "STOP"}
@@ -1456,6 +1537,7 @@ export function ControlWizard() {
                       onClick={() => setSelectedAction("STOP")}
                     />
                     <ActionTile
+                      kind="RESET"
                       title="รีเซ็ต"
                       icon={<IconReset />}
                       selected={selectedAction === "RESET"}
@@ -1465,22 +1547,39 @@ export function ControlWizard() {
                   </div>
                 </div>
 
-                <div className="mt-6 flex items-center justify-between">
-                  <button type="button" className="text-[14px] text-[color:#6B6B6B] hover:underline" onClick={goBack}>
-                    ← ย้อนกลับ
+                {/* Buttons row */}
+                <div className="w-full flex items-start justify-between gap-6">
+                  <button
+                    type="button"
+                    onClick={goBack}
+                    className={cn(
+                      "h-10 w-[120px] rounded-md",
+                      "inline-flex items-center justify-center gap-2",
+                      "bg-transparent",
+                      "text-[16px] leading-[100%] text-[#303030]"
+                    )}
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="#1E1E1E" strokeWidth="1.6" aria-hidden="true">
+                      <path d="M14 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    ย้อนกลับ
                   </button>
 
                   <Button
                     onClick={goNext}
                     disabled={!selectedAction || !selectedRoom || !actionEnabled(selectedAction, selectedRoom)}
+                    size="figma40"
                     className={cn(
-                      "h-12 px-8 rounded-md border",
+                      "w-[120px] rounded-sm border",
                       selectedAction && selectedRoom && actionEnabled(selectedAction, selectedRoom)
-                        ? "border-[color:#14AE5C] bg-[color:#14AE5C] text-white hover:bg-[color:#109A51]"
-                        : "border-[#E9E9E9] bg-[#E9E9E9] text-[color:#6B6B6B]"
+                        ? "bg-green border-[#009951] text-greenBg hover:bg-[color:#109A51]"
+                        : "bg-[#D9D9D9] border-[#D9D9D9] text-[#757575]"
                     )}
                   >
-                    ถัดไป <span aria-hidden className="ml-2">›</span>
+                    ถัดไป
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                      <path d="M10 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </Button>
                 </div>
               </div>
@@ -1488,7 +1587,7 @@ export function ControlWizard() {
 
             {/* =================== Step 3 =================== */}
             {step === 3 && (
-              <div className="mx-auto w-full max-w-[980px]">
+              <div className="w-full max-w-[1300px]">
                 <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
                   <div className="text-[22px] font-semibold">เลือกโปรไฟล์อุณหภูมิ</div>
                   <div className="mt-1 text-[16px] text-muted">เลือกโปรไฟล์ที่ต้องการใช้สำหรับการอบ</div>
@@ -1580,7 +1679,7 @@ export function ControlWizard() {
                       minuteStep={1}
                       onClose={() => setTimePickerOpen(false)}
                       onConfirm={(hhmm) => {
-                        // ✅ sync ทั้งสองที่ (สำคัญมาก)
+                        // sync picker value to form and close picker
                         setStartForm((prev) => ({ ...prev, scheduleHHMM: hhmm }));
                         setPickerValue(hhmm);
                         setTimePickerOpen(false);
@@ -1602,21 +1701,37 @@ export function ControlWizard() {
                 </div>
 
                 <div className="mt-6 flex items-center justify-between">
-                  <button type="button" className="text-[14px] text-[color:#6B6B6B] hover:underline" onClick={goBack}>
-                    ← ย้อนกลับ
+                  <button
+                    type="button"
+                    onClick={goBack}
+                    className={cn(
+                      "h-10 w-[120px] rounded-md",
+                      "inline-flex items-center justify-center gap-2",
+                      "bg-transparent",
+                      "text-[16px] leading-[100%] text-[#303030]"
+                    )}
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="#1E1E1E" strokeWidth="1.6" aria-hidden="true">
+                      <path d="M14 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    ย้อนกลับ
                   </button>
 
                   <Button
                     onClick={goNext}
                     disabled={step3NextDisabled}
+                    size="figma40"
                     className={cn(
-                      "h-12 px-8 rounded-md border",
+                      "w-[120px] rounded-sm border",
                       !step3NextDisabled
-                        ? "border-[color:#14AE5C] bg-[color:#14AE5C] text-white hover:bg-[color:#109A51]"
-                        : "border-[#E9E9E9] bg-[#E9E9E9] text-[color:#6B6B6B]"
+                        ? "bg-green border-[#009951] text-greenBg hover:bg-[color:#109A51]"
+                        : "bg-[#D9D9D9] border-[#D9D9D9] text-[#757575]"
                     )}
                   >
-                    ถัดไป <span aria-hidden className="ml-2">›</span>
+                    ถัดไป
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                      <path d="M10 6l6 6-6 6" />
+                    </svg>
                   </Button>
                 </div>
               </div>
